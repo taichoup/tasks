@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 
-const API_URL = "https://<your-api-gateway-id>.execute-api.us-east-1.amazonaws.com/dev/tasks";
+const API_GATEWAY_ID = "6s6jd82e80";
+const API_URL = `https://${API_GATEWAY_ID}.execute-api.us-east-1.amazonaws.com/dev/tasks`;
 
 // ----- Types -----
 export interface Task {
@@ -90,3 +91,4 @@ export default function App() {
       </ul>
     </div>
   );
+}
