@@ -75,18 +75,7 @@ export default function App() {
       />
       <button onClick={addTask}>Add</button>
       <ul>
-        {tasks.map((t) => (
-          <li key={t.id}>
-            <label>
-              <input
-                type="checkbox"
-                checked={t.checked}
-                onChange={() => toggleTask(t)}
-              />
-              {t.title}
-            </label>
-          </li>
-        ))}
+          {tasks.map(t => <Task task={t} key={t.id} setTasks={setTasks} />)}
       </ul>
     </div>
   );
