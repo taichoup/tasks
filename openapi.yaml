@@ -7,14 +7,14 @@ paths:
     get:
       summary: Get all tasks
       responses:
-        '200':
+        "200":
           description: List of tasks
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Task'
+                  $ref: "#/components/schemas/Task"
     post:
       summary: Create a new task
       requestBody:
@@ -22,9 +22,9 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/NewTask'
+              $ref: "#/components/schemas/NewTask"
       responses:
-        '201':
+        "201":
           description: Task created
     put:
       summary: Update a task
@@ -33,9 +33,9 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UpdateTask'
+              $ref: "#/components/schemas/UpdateTask"
       responses:
-        '200':
+        "200":
           description: Task updated
 components:
   schemas:
@@ -53,8 +53,15 @@ components:
           type: string
           format: date-time
         frequency:
-          type: string
-          enum: [daily, weekly]
+          type: object
+          properties:
+            value:
+              type: integer
+              minimum: 1
+            unit:
+              type: string
+              enum: [day, week, month, year]
+          required: [value, unit]
     NewTask:
       type: object
       required: [title]
@@ -62,8 +69,15 @@ components:
         title:
           type: string
         frequency:
-          type: string
-          enum: [daily, weekly]
+          type: object
+          properties:
+            value:
+              type: integer
+              minimum: 1
+            unit:
+              type: string
+              enum: [day, week, month, year]
+          required: [value, unit]
     UpdateTask:
       type: object
       required: [id, checked]
