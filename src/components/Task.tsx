@@ -1,23 +1,21 @@
 import type { components } from "../../shared/types";
-import { deleteTask, fetchTasks, toggleTask } from "../api/requests";
+import { deleteTask, toggleTask } from "../api/requests";
 
 type Task = components["schemas"]["Task"];
 
 interface TaskProps {
     task: Task;
-    setTasks: (taskList: Task[]) => void;
+    refetch: () => void;
 }
 
-export const Task = ({ task, setTasks }: TaskProps) => {
+export const Task = ({ task, refetch }: TaskProps) => {
 
     const details =
         `Frequency: ${task.frequency ?? 'not set'}. Last checked: ${task.lastChecked ? new Intl.DateTimeFormat('fr').format(new Date(task.lastChecked)) : ''}`
 
     const refreshDisplayedTasks = async () => {
         console.log("DEBUG: refreshing the view with new tasks");
-        const newTasks = await fetchTasks();
-        console.log("DEBUG: new tasks")
-        setTasks(newTasks ?? []);
+        refetch();
     }
 
     const handleToggleTask = async () => {

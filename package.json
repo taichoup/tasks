@@ -11,6 +11,7 @@
     "generate:types": "openapi-typescript ./openapi.yaml --output ./shared/types.ts"
   },
   "dependencies": {
+    "@tanstack/react-query": "^5.85.3",
     "react": "^19.1.1",
     "react-dom": "^19.1.1"
   },

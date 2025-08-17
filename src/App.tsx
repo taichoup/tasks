@@ -1,32 +1,46 @@
-import { useEffect, useState } from "react";
-
+import { Suspense, useEffect, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import styles from './App.module.css';
 import { Task } from "./components/Task";
 import { addTask, fetchTasks } from "./api/requests";
+import type { components } from "../shared/types";
 
+type Task = components["schemas"]["Task"];
 
+function TaskList() {
 
+  const { data: tasks, isLoading, error, refetch } = 
+    useQuery<unknown, Error, Task[]>({
+      queryKey: ['tasks'],
+      queryFn: fetchTasks,
+    });
 
-
-// ----- Component -----
-export default function App() {
-  const [tasks, setTasks] = useState<Task[]>([]);
-  const [newTitle, setNewTitle] = useState("");
-
-  const refreshTasks = async () => {
-    const data = await fetchTasks() ?? []; // default to empty array if errors (to be improved)
-    setTasks(data);
+  if (isLoading) {
+    return <div>Loading tasks...</div>;
+  }
+  if (error) {
+    return <div>Error loading tasks</div>;
   }
 
-  useEffect(() => {
-    refreshTasks();
-  }, []);
+  return (
+    <ul className={styles.taskList}>
+      {tasks?.map(t => <Task task={t} key={t.id} refetch={refetch} />)}
+    </ul>
+  );
+}
+
+
+export default function App() {
+  const [newTitle, setNewTitle] = useState("");
+
+  const queryClient = useQueryClient();
 
   const handleAddTask = async () => {
     try {
-      addTask(newTitle);
+      await addTask(newTitle);
       setNewTitle("");
-      refreshTasks();
+      // mark query as stale to refetch tasks automatically
+      queryClient.invalidateQueries({ queryKey: ['tasks'] });
     } catch (serverError) {
       console.error(serverError);
     }
@@ -44,9 +58,7 @@ export default function App() {
           placeholder="New task..."
         />
         <button onClick={handleAddTask}>Add</button>
-        <ul>
-          {tasks.map(t => <Task task={t} key={t.id} setTasks={setTasks} />)}
-        </ul>
+        <TaskList />
       </main>
     </>
 
