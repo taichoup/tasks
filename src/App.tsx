@@ -1,32 +1,10 @@
 import { useState } from "react";
-import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
+import { useQueryClient, useMutation } from "@tanstack/react-query";
 import styles from './App.module.css';
-import { Task } from "./components/Task";
-import { addTask, fetchTasks } from "./api/requests";
+import { addTask } from "./api/requests";
 import type { components } from "../shared/types";
+import { TaskList } from "./components/TaskList";
 
-type Task = components["schemas"]["Task"];
-
-function TaskList() {
-  const { data: tasks, isLoading, error } = 
-    useQuery<unknown, Error, Task[]>({
-      queryKey: ['tasks'],
-      queryFn: fetchTasks,
-    });
-
-  if (isLoading) {
-    return <div>Loading tasks...</div>;
-  }
-  if (error) {
-    return <div>Error loading tasks</div>;
-  }
-
-  return (
-    <ul className={styles.taskList}>
-      {tasks?.map(t => <Task task={t} key={t.id} />)}
-    </ul>
-  );
-}
 
 export default function App() {
   const [newTitle, setNewTitle] = useState("");
@@ -58,7 +36,7 @@ export default function App() {
   return (
     <>
       <header>
-        <h1>Task App (AWS)</h1>
+        <h1>Task App</h1>
       </header>
       <main>
         <div className={styles.addTaskForm}>
