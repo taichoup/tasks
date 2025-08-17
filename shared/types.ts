@@ -94,19 +94,21 @@ export interface components {
             checked: boolean;
             /** Format: date-time */
             lastChecked?: string;
-            frequency?: {
+            frequency: {
                 value: number;
                 /** @enum {string} */
                 unit: "day" | "week" | "month" | "year";
             };
+            tag?: ("maison" | "jardin" | "vélos" | "voiture")[];
         };
         NewTask: {
             title: string;
-            frequency?: {
+            frequency: {
                 value: number;
                 /** @enum {string} */
                 unit: "day" | "week" | "month" | "year";
             };
+            tags?: ("maison" | "jardin" | "vélos" | "voiture")[];
         };
         UpdateTask: {
             id: string;

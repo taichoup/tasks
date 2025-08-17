@@ -1,0 +1,25 @@
+.tag {
+    border-radius: 4px;
+    padding: 2px 4px;
+    margin-right: 4px;
+    font-size: 0.9em;
+    font-family: Arial, sans-serif;
+    width: fit-content  ;
+}
+
+.jardin {
+    background-color: #4CAF50;
+    color: white;
+}
+.velos {
+    background-color: #2196F3;
+    color: white;
+}
+.voiture {
+    background-color: #9c27b0;
+    color: white;
+}
+.maison {
+    background-color: #ff9800;
+    color: black;
+}

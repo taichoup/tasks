@@ -1,0 +1,12 @@
+.addTaskForm {
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+  margin-bottom: 16px;
+  justify-content: center;
+}
+
+header {
+  text-align: center;
+  margin-bottom: 16px;
+}

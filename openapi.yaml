@@ -41,7 +41,7 @@ components:
   schemas:
     Task:
       type: object
-      required: [id, title, checked]
+      required: [id, title, checked, frequency]
       properties:
         id:
           type: string
@@ -62,9 +62,14 @@ components:
               type: string
               enum: [day, week, month, year]
           required: [value, unit]
+        tag:
+          type: array
+          items:
+            type: string
+            enum: [maison, jardin, vélos, voiture]
     NewTask:
       type: object
-      required: [title]
+      required: [title, frequency]
       properties:
         title:
           type: string
@@ -78,6 +83,11 @@ components:
               type: string
               enum: [day, week, month, year]
           required: [value, unit]
+        tags:
+          type: array
+          items:
+            type: string
+            enum: [maison, jardin, vélos, voiture]
     UpdateTask:
       type: object
       required: [id, checked]

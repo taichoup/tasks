@@ -19,19 +19,30 @@ export async function fetchTasks() {
 }
 
 // Add a task
-// TODO: this should take the frequency as param too. 
 // The type of the param should be <components["schemas"]["NewTask"]
-export async function addTask(newTitle: string) {
-    if (!newTitle.trim()) throw new Error('New title cannot be empty');
-    const res = await fetch(API_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title: newTitle, frequency: "daily" }), // TODO
-    });
-    if (!res.ok) {
-        throw new Error(`Failed to add task. ${res.statusText}`);
-    }
-    return res;
+export async function addTask(
+    newTitle: string, 
+    newRecurrenceQty: number,
+    newRecurrenceUnit: components["schemas"]["Task"]["frequency"]["unit"],
+    newTags: components["schemas"]["Task"]["tag"] | []) {
+        if (!newTitle.trim()) throw new Error('New title cannot be empty');
+        if (newRecurrenceQty <= 0) throw new Error('Recurrence quantity must be greater than 0');
+        if (!newRecurrenceUnit) throw new Error('Recurrence unit must be specified');
+
+        const body: components["schemas"]["NewTask"] = {
+            title: newTitle,
+            frequency: { value: newRecurrenceQty, unit: newRecurrenceUnit },
+            tags: newTags,
+        };
+        const res = await fetch(API_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(body),
+        });
+        if (!res.ok) {
+            throw new Error(`Failed to add task. ${res.statusText}`);
+        }
+        return res;
 }
 
 // Toggle task completion
