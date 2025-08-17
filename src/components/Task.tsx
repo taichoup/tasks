@@ -1,3 +1,4 @@
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { components } from "../../shared/types";
 import { deleteTask, toggleTask } from "../api/requests";
 
@@ -5,28 +6,35 @@ type Task = components["schemas"]["Task"];
 
 interface TaskProps {
     task: Task;
-    refetch: () => void;
 }
 
-export const Task = ({ task, refetch }: TaskProps) => {
+export const Task = ({ task }: TaskProps) => {
+    const queryClient = useQueryClient();
+
+    const toggleMutation = useMutation({
+        mutationFn: () => toggleTask(task),
+        onSuccess: () => {
+            // Invalidate tasks query to refetch updated list
+            queryClient.invalidateQueries({ queryKey: ['tasks'] });
+        }
+    });
+
+    const deleteMutation = useMutation({
+        mutationFn: () => deleteTask(task.id),
+        onSuccess: async () => {
+            console.log("DEBUG: Task deleted successfully");
+            // TODO: fix. Without this hack, the sever replies with stale data somehow
+            // Wait briefly before refetching
+            await new Promise(res => setTimeout(res, 300));
+            queryClient.invalidateQueries({ queryKey: ['tasks'] });
+        },
+        onError: (error) => {
+            console.error("DEBUG: Error deleting task:", error);
+        }
+    });
 
     const details =
-        `Frequency: ${task.frequency ?? 'not set'}. Last checked: ${task.lastChecked ? new Intl.DateTimeFormat('fr').format(new Date(task.lastChecked)) : ''}`
-
-    const refreshDisplayedTasks = async () => {
-        console.log("DEBUG: refreshing the view with new tasks");
-        refetch();
-    }
-
-    const handleToggleTask = async () => {
-        await toggleTask(task);
-        await refreshDisplayedTasks();
-    }
-
-    const handleDeleteTask = async () => {
-        await deleteTask(task.id);
-        await refreshDisplayedTasks();
-    }
+        `Frequency: ${task.frequency ?? 'not set'}. Last checked: ${task.lastChecked ? new Intl.DateTimeFormat('fr').format(new Date(task.lastChecked)) : ''}`;
 
     return (
         <li key={task.id}>
@@ -34,12 +42,18 @@ export const Task = ({ task, refetch }: TaskProps) => {
                 <input
                     type="checkbox"
                     checked={task.checked}
-                    onChange={handleToggleTask}
+                    onChange={() => toggleMutation.mutate()}
+                    disabled={toggleMutation.isPending}
                 />
                 {task.title}
             </label>
             <span>{details}</span>
-            <button onClick={handleDeleteTask}>Delete</button>
+            <button
+                onClick={() => deleteMutation.mutate()}
+                disabled={deleteMutation.isPending}
+            >
+                Delete
+            </button>
         </li>
-    )
+    );
 }

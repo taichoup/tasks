@@ -1,4 +1,4 @@
-import { Suspense, useEffect, useState } from "react";
+import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import styles from './App.module.css';
 import { Task } from "./components/Task";
@@ -9,7 +9,7 @@ type Task = components["schemas"]["Task"];
 
 function TaskList() {
 
-  const { data: tasks, isLoading, error, refetch } = 
+  const { data: tasks, isLoading, error } = 
     useQuery<unknown, Error, Task[]>({
       queryKey: ['tasks'],
       queryFn: fetchTasks,
@@ -24,7 +24,7 @@ function TaskList() {
 
   return (
     <ul className={styles.taskList}>
-      {tasks?.map(t => <Task task={t} key={t.id} refetch={refetch} />)}
+      {tasks?.map(t => <Task task={t} key={t.id} />)}
     </ul>
   );
 }
