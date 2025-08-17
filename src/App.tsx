@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import styles from './App.module.css';
 import { Task } from "./components/Task";
 import { addTask, fetchTasks } from "./api/requests";
@@ -8,7 +8,6 @@ import type { components } from "../shared/types";
 type Task = components["schemas"]["Task"];
 
 function TaskList() {
-
   const { data: tasks, isLoading, error } = 
     useQuery<unknown, Error, Task[]>({
       queryKey: ['tasks'],
@@ -29,22 +28,26 @@ function TaskList() {
   );
 }
 
-
 export default function App() {
   const [newTitle, setNewTitle] = useState("");
-
   const queryClient = useQueryClient();
 
-  const handleAddTask = async () => {
-    try {
-      await addTask(newTitle);
+  const addTaskMutation = useMutation({
+    mutationFn: addTask,
+    onSuccess: () => {
       setNewTitle("");
-      // mark query as stale to refetch tasks automatically
-      queryClient.invalidateQueries({ queryKey: ['tasks'] });
-    } catch (serverError) {
-      console.error(serverError);
+      queryClient.invalidateQueries({ queryKey: ['tasks'], refetchType: 'active' });
+    },
+    onError: (error) => {
+      console.error(error);
     }
-  }
+  });
+
+  const handleAddTask = () => {
+    if (newTitle.trim()) {
+      addTaskMutation.mutate(newTitle);
+    }
+  };
 
   return (
     <>
@@ -57,10 +60,11 @@ export default function App() {
           onChange={(e) => setNewTitle(e.target.value)}
           placeholder="New task..."
         />
-        <button onClick={handleAddTask}>Add</button>
+        <button onClick={handleAddTask} disabled={addTaskMutation.isPending}>
+          Add
+        </button>
         <TaskList />
       </main>
     </>
-
   );
 }
