@@ -3,6 +3,7 @@ import styles from '../App.module.css';
 import { Task } from "./Task";
 import { fetchTasks } from "../api/requests";
 import type { Task as TaskType } from "../types/derived";
+import { CheckedTasksSortFunction, unCheckedTasksSortFunction } from "../utils/taskSorting";
 
 export function TaskList() {
   const { data: tasks, isLoading, error } = 
@@ -18,13 +19,13 @@ export function TaskList() {
     return <div>Error loading tasks</div>;
   }
 
-  // Sort: tasks without lastChecked first, then by descending lastChecked date
-  const sortedTasks = [...(tasks ?? [])].sort((a, b) => {
-    if (!a.lastChecked && !b.lastChecked) return 0;
-    if (!a.lastChecked) return -1;
-    if (!b.lastChecked) return 1;
-    return new Date(b.lastChecked).getTime() - new Date(a.lastChecked).getTime();
-  });
+
+  // Sort: tasks without lastChecked first, by descending frequency, then the checked tasks by descending lastChecked date
+  const uncheckedTasks = (tasks ?? []).filter(t => !t.lastChecked);
+  const sortedUncheckedTasks = [...(uncheckedTasks ?? [])].sort(unCheckedTasksSortFunction);
+  const checkedTasks = (tasks ?? []).filter(t => t.lastChecked);
+  const sortedCheckedTasks = [...(checkedTasks ?? [])].sort(CheckedTasksSortFunction);
+  const sortedTasks = sortedUncheckedTasks.concat(sortedCheckedTasks);
 
   return (
     <ul className={styles.taskList}>
