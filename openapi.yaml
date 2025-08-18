@@ -62,7 +62,7 @@ components:
               type: string
               enum: [day, week, month, year]
           required: [value, unit]
-        tag:
+        tags:
           type: array
           items:
             type: string

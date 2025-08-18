@@ -5,6 +5,7 @@ import styles from './Task.module.css';
 import { Tag } from "./Tag";
 
 type Task = components["schemas"]["Task"];
+type TaskFrequencyUnit = components["schemas"]["Task"]["frequency"]["unit"];
 
 interface TaskProps {
     task: Task;
@@ -36,8 +37,8 @@ export const Task = ({ task }: TaskProps) => {
         }
     });
 
-    const getLocalizedUnit = (unitInEnglish: components["schemas"]["Task"]["frequency"]["unit"], value: number) => {
-        const translations: Record<string, string> = {
+    const getLocalizedUnit = (unitInEnglish: TaskFrequencyUnit, value: number) => {
+        const translations: Record<TaskFrequencyUnit, string> = {
             day: "jour",
             week: "semaine",
             month: "mois",
@@ -69,7 +70,7 @@ export const Task = ({ task }: TaskProps) => {
                 <span>{getLocalizedUnit(task.frequency?.unit, task.frequency.value)}</span>
                 {task.lastChecked ? `Effectué pour la dernière fois le: ${new Intl.DateTimeFormat('fr').format(new Date(task.lastChecked))}` : ''}
                 {/* Je pense que TS râle ici parce que j'ai oublié un s qqpart dans le yaml mais attention à ne pas forcer l'update, voir le ROADMAP.md */}
-                {task.tags?.length > 0 ? <Tag label={task.tags[0]} /> : null}
+                {task.tags && task.tags.length > 0 ? <Tag label={task.tags[0]} /> : null}
             </div>
             <button
                 onClick={() => deleteMutation.mutate()}

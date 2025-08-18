@@ -24,7 +24,7 @@ export async function addTask(
     newTitle: string, 
     newRecurrenceQty: number,
     newRecurrenceUnit: components["schemas"]["Task"]["frequency"]["unit"],
-    newTags: components["schemas"]["Task"]["tag"] | []) {
+    newTags: components["schemas"]["Task"]["tags"] | []) {
         if (!newTitle.trim()) throw new Error('New title cannot be empty');
         if (newRecurrenceQty <= 0) throw new Error('Recurrence quantity must be greater than 0');
         if (!newRecurrenceUnit) throw new Error('Recurrence unit must be specified');

@@ -10,7 +10,7 @@ export default function App() {
   const [newTitle, setNewTitle] = useState("");
   const [newRecurrenceQty, setNewRecurrenceQty] = useState(0);
   const [newRecurrenceUnit, setNewRecurrenceUnit] = useState<components["schemas"]["Task"]["frequency"]["unit"]>("day");
-  const [newTags, setNewTags] = useState<components["schemas"]["Task"]["tag"] | []>([]);
+  const [newTags, setNewTags] = useState<components["schemas"]["Task"]["tags"] | []>([]);
   const queryClient = useQueryClient();
 
   const addTaskMutation = useMutation({
@@ -75,7 +75,7 @@ export default function App() {
             onChange={(e) =>
               setNewTags([
                 e.target.value,
-              ] as components["schemas"]["Task"]["tag"])
+              ] as components["schemas"]["Task"]["tags"])
             }
           >
             <option value="">Ajouter un tag ? </option>

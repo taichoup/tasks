@@ -99,7 +99,7 @@ export interface components {
                 /** @enum {string} */
                 unit: "day" | "week" | "month" | "year";
             };
-            tag?: ("maison" | "jardin" | "vélos" | "voiture")[];
+            tags?: ("maison" | "jardin" | "vélos" | "voiture")[];
         };
         NewTask: {
             title: string;

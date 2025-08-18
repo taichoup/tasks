@@ -1,8 +1,12 @@
 import type { components } from "../../shared/types";
 import styles from './Tag.module.css';
 
+type TagProps = {
+    // always defined
+    label: NonNullable<components["schemas"]["Task"]["tags"]>[number] | []
+}
 
-export const Tag = ({label}: {label: keyof components["schemas"]["Task"]["tag"]}) => {
+export const Tag = ({label}: TagProps) => {
     switch (label) {
         case "maison":
             return <span className={`${styles.tag} ${styles.maison}`}>🏠 maison</span>
