@@ -10,6 +10,4 @@ ATTENTION: si on veut modifier le schema il faut d'abord merger avec celui de l'
 
 
 
-leaving things here: it's kind of working but CSS ugly + all of the above + un truc à la con qui fait que les composants reacts ne re-render pas quand les réponses sont reçues. Bref il faudrait que je nettoie tout ça, sûrement un truc bête.
-
-(ah et il faut que les nouvelles tasks pètent, c'est pas normal qu'elles marchent vu que j'ai changé le contrat)
+for next time: j'ai modifié un peu le openapi (tag -> tags) pour fixer des erreurs TS et n'ai pas encore reporté ça dans la API Gateway 😬 TODO...
