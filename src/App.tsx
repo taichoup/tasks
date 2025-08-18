@@ -29,7 +29,7 @@ export default function App() {
 
   const handleAddTask = () => {
     if (newTitle.trim()) {
-      addTaskMutation.mutate(newTitle);
+      addTaskMutation.mutate();
     }
   };
 
@@ -46,17 +46,38 @@ export default function App() {
             placeholder="New task..."
             autoFocus
           />
-          <input type="number" value={newRecurrenceQty} onChange={(e) => setNewRecurrenceQty(Number(e.target.value))} />
-          <select value={newRecurrenceUnit} onChange={(e) => setNewRecurrenceUnit(e.target.value as components["schemas"]["Task"]["frequency"]["unit"])}>
-            <option value="day">Day</option>
-            <option value="week">Week</option>
-            <option value="month">Month</option>
-            <option value="year">Year</option>
+          <span>tous les...</span>
+          <input
+            type="number"
+            value={newRecurrenceQty}
+            onChange={(e) => setNewRecurrenceQty(Number(e.target.value))}
+            className={styles.numberInput}
+          />
+          <select
+            value={newRecurrenceUnit}
+            onChange={(e) =>
+              setNewRecurrenceUnit(
+                e.target
+                  .value as components["schemas"]["Task"]["frequency"]["unit"]
+              )
+            }
+          >
+            <option value="day">Jours</option>
+            <option value="week">Semaines</option>
+            <option value="month">Mois</option>
+            <option value="year">Ans</option>
           </select>
 
           {/* Possible de supporter plusieurs tags, et le schema l'accepterait mais pour l'instant faisons simple */}
           {/* <select value={newTags ?? ""} onChange={(e) => setNewTags(Array.from(e.target.selectedOptions, option => option.value as components["schemas"]["Task"]["tag"]))} multiple> */}
-          <select value={newTags ?? ""} onChange={(e) => setNewTags([e.target.value] as components["schemas"]["Task"]["tag"])} >
+          <select
+            value={newTags ?? ""}
+            onChange={(e) =>
+              setNewTags([
+                e.target.value,
+              ] as components["schemas"]["Task"]["tag"])
+            }
+          >
             <option value="">Ajouter un tag ? </option>
             <option value="maison">Maison</option>
             <option value="jardin">Jardin</option>
