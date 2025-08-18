@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import type { components } from "../../shared/types";
+import type { components } from "../../shared/generated-types";
 import { deleteTask, toggleTask } from "../api/requests";
 import styles from './Task.module.css';
 import { Tag } from "./Tag";

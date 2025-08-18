@@ -2,13 +2,11 @@ import { useQuery } from "@tanstack/react-query";
 import styles from '../App.module.css';
 import { Task } from "./Task";
 import { fetchTasks } from "../api/requests";
-import type { components } from "../../shared/types";
-
-type Task = components["schemas"]["Task"];
+import type { Task as TaskType } from "../types/derived";
 
 export function TaskList() {
   const { data: tasks, isLoading, error } = 
-    useQuery<unknown, Error, Task[]>({
+    useQuery<unknown, Error, TaskType[]>({
       queryKey: ['tasks'],
       queryFn: fetchTasks,
     });

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useQueryClient, useMutation } from "@tanstack/react-query";
 import styles from './App.module.css';
 import { addTask } from "./api/requests";
-import type { components } from "../shared/types";
+import type { components } from "../shared/generated-types";
 import { TaskList } from "./components/TaskList";
 
 

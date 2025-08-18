@@ -1,11 +1,9 @@
 
-import { type components } from '../../shared/types';
-import { Task } from '../components/Task';
+import { type components } from '../../shared/generated-types';
+import type { Task } from '../types/derived';
 
 const API_GATEWAY_ID = "6s6jd82e80";
 const API_URL = `https://${API_GATEWAY_ID}.execute-api.eu-north-1.amazonaws.com/preprod/tasks`
-
-type Task = components["schemas"]["Task"];
 
 // Fetch tasks from API
 export async function fetchTasks() {

@@ -1,9 +1,8 @@
-import type { components } from "../../shared/types";
+import type { NonNullishTag } from "../types/derived";
 import styles from './Tag.module.css';
 
 type TagProps = {
-    // always defined
-    label: NonNullable<components["schemas"]["Task"]["tags"]>[number] | []
+    label: NonNullishTag
 }
 
 export const Tag = ({label}: TagProps) => {
