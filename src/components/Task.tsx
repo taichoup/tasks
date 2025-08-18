@@ -46,7 +46,7 @@ export const Task = ({ task }: TaskProps) => {
         };
         const prefix = unitInEnglish === "week" ? "Fréquence: toutes les " : "Fréquence: tous les "
         if (value === 1) {
-            return `${prefix}${translations[unitInEnglish]}s`;
+            return `${prefix}${translations[unitInEnglish]}${unitInEnglish === "month" ? "" : "s"}`;
         }
         if (value > 1 && unitInEnglish !== "month") {
             return `${prefix}${value} ${translations[unitInEnglish]}s`;
@@ -69,7 +69,6 @@ export const Task = ({ task }: TaskProps) => {
                 </label>
                 <span>{getLocalizedUnit(task.frequency?.unit, task.frequency.value)}</span>
                 {task.lastChecked ? `Effectué pour la dernière fois le: ${new Intl.DateTimeFormat('fr').format(new Date(task.lastChecked))}` : ''}
-                {/* Je pense que TS râle ici parce que j'ai oublié un s qqpart dans le yaml mais attention à ne pas forcer l'update, voir le ROADMAP.md */}
                 {task.tags && task.tags.length > 0 ? <Tag label={task.tags[0]} /> : null}
             </div>
             <button
