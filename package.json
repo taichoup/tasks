@@ -8,7 +8,7 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "generate:types": "openapi-typescript ./openapi.yaml --output ./shared/generated-types.ts",
+    "generate:types": "openapi-typescript ./backend/openapi.yaml --output ./shared/generated-types.ts",
     "test": "vitest",
     "build:lambda": "mkdir -p dist && cd backend/tasks-lambda && zip ../../dist/tasks-lambda.zip index.mjs",
     "deploy:lambda": "aws lambda update-function-code --function-name TasksHandler --zip-file fileb://dist/tasks-lambda.zip --region eu-north-1",
