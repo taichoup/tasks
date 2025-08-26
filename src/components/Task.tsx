@@ -55,6 +55,15 @@ export const Task = ({ task }: TaskProps) => {
         }
     };
 
+    const dateFormatOptions = {
+        weekday: undefined,
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+    } satisfies Intl.DateTimeFormatOptions;
+
+    const lastCheckedDate = task.lastChecked ? new Intl.DateTimeFormat('fr-FR', dateFormatOptions).format(new Date(task.lastChecked)) : null;
+
     return (
         <li key={task.id}>
             <div className={styles.taskDetails}>
@@ -67,9 +76,9 @@ export const Task = ({ task }: TaskProps) => {
                     />
                     <strong>{task.title}</strong>
                 </label>
-                <span>{getLocalizedUnit(task.frequency?.unit, task.frequency.value)}</span>
-                {task.lastChecked ? `Effectué pour la dernière fois le: ${new Intl.DateTimeFormat('fr').format(new Date(task.lastChecked))}` : ''}
-                {task.tags && task.tags.length > 0 ? <Tag label={task.tags[0]} /> : null}
+                <span className={styles.taskDetailsItem}>{getLocalizedUnit(task.frequency?.unit, task.frequency.value)}</span>
+                <span className={styles.taskDetailsItem}>{task.lastChecked ? `Effectué pour la dernière fois le ${lastCheckedDate}` : ''}</span>
+                <span className={styles.taskDetailsItem}>{task.tags && task.tags.length > 0 ? <Tag label={task.tags[0]} /> : null}</span>
             </div>
             <button
                 onClick={() => deleteMutation.mutate()}

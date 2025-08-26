@@ -16,3 +16,8 @@ li {
     justify-content: space-between;
     align-items: center;
 }
+
+.taskDetailsItem {
+    font-size: 0.9rem;
+    color: gray;
+}

@@ -4,10 +4,20 @@
   gap: 8px;
   margin-bottom: 16px;
   justify-content: center;
+  align-items: center;
 }
 
 .numberInput {
   width: 50px;
+  /* height: 1.5rem; */
+}
+
+.addTaskForm select, button {
+  height: 2rem;
+}
+
+.addTaskForm input {
+  height: 1.62rem;
 }
 
 header {
