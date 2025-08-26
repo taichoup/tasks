@@ -7,7 +7,7 @@ import {
   unCheckedTasksSortFunction,
   CheckedTasksSortFunction,
 } from "./taskSorting";
-import type { Task } from "../types/derived";
+import type { Task, TagList } from "../types/derived";
 
 const BASE_TASK: Task = {
   id: "1",
@@ -15,7 +15,7 @@ const BASE_TASK: Task = {
   frequency: { unit: "day", value: 1 },
   lastChecked: undefined,
   checked: false,
-  tags: [],
+  tags: [] as TagList,
 };
 
 describe("convertTaskToDays", () => {
@@ -38,50 +38,50 @@ describe("convertTaskToDays", () => {
 
 describe("isSameFrequency", () => {
   it("returns true for same unit and value", () => {
-    const a = { ...BASE_TASK, frequency: { unit: "day", value: 1 } };
-    const b = { ...BASE_TASK, frequency: { unit: "day", value: 1 } };
+    const a = { ...BASE_TASK, frequency: { unit: "day", value: 1 } } as Task;
+    const b = { ...BASE_TASK, frequency: { unit: "day", value: 1 } } as Task;
     expect(isSameFrequency(a, b)).toBe(true);
   });
   it("returns false for different unit or value", () => {
-    const a = { ...BASE_TASK, frequency: { unit: "day", value: 1 } };
-    const b = { ...BASE_TASK, frequency: { unit: "week", value: 1 } };
+    const a = { ...BASE_TASK, frequency: { unit: "day", value: 1 } } as Task;
+    const b = { ...BASE_TASK, frequency: { unit: "week", value: 1 } } as Task;
     expect(isSameFrequency(a, b)).toBe(false);
-    const c = { ...BASE_TASK, frequency: { unit: "day", value: 2 } };
+    const c = { ...BASE_TASK, frequency: { unit: "day", value: 2 } } as Task;
     expect(isSameFrequency(a, c)).toBe(false);
   });
 });
 
 describe("isSameUnit", () => {
   it("returns true for same unit", () => {
-    const a = { ...BASE_TASK, frequency: { unit: "day", value: 1 } };
-    const b = { ...BASE_TASK, frequency: { unit: "day", value: 2 } };
+    const a = { ...BASE_TASK, frequency: { unit: "day", value: 1 } } as Task;
+    const b = { ...BASE_TASK, frequency: { unit: "day", value: 2 } } as Task;
     expect(isSameUnit(a, b)).toBe(true);
   });
   it("returns false for different unit", () => {
-    const a = { ...BASE_TASK, frequency: { unit: "day", value: 1 } };
-    const b = { ...BASE_TASK, frequency: { unit: "week", value: 1 } };
+    const a = { ...BASE_TASK, frequency: { unit: "day", value: 1 } } as Task;
+    const b = { ...BASE_TASK, frequency: { unit: "week", value: 1 } } as Task;
     expect(isSameUnit(a, b)).toBe(false);
   });
 });
 
 describe("isSameValue", () => {
   it("returns true for same value", () => {
-    const a = { ...BASE_TASK, frequency: { unit: "day", value: 1 } };
-    const b = { ...BASE_TASK, frequency: { unit: "week", value: 1 } };
+    const a = { ...BASE_TASK, frequency: { unit: "day", value: 1 } } as Task;
+    const b = { ...BASE_TASK, frequency: { unit: "week", value: 1 } } as Task;
     expect(isSameValue(a, b)).toBe(true);
   });
   it("returns false for different value", () => {
-    const a = { ...BASE_TASK, frequency: { unit: "day", value: 1 } };
-    const b = { ...BASE_TASK, frequency: { unit: "day", value: 2 } };
+    const a = { ...BASE_TASK, frequency: { unit: "day", value: 1 } } as Task;
+    const b = { ...BASE_TASK, frequency: { unit: "day", value: 2 } } as Task;
     expect(isSameValue(a, b)).toBe(false);
   });
 });
 
 describe("unCheckedTasksSortFunction", () => {
   it("sorts unchecked tasks by ascending frequency (converted to days)", () => {
-    const t1 = { ...BASE_TASK, frequency: { unit: "week", value: 1 }, lastChecked: undefined };
-    const t2 = { ...BASE_TASK, frequency: { unit: "day", value: 3 }, lastChecked: undefined };
-    const t3 = { ...BASE_TASK, frequency: { unit: "month", value: 1 }, lastChecked: undefined };
+    const t1 = { ...BASE_TASK, frequency: { unit: "week", value: 1 }, lastChecked: undefined } as Task;
+    const t2 = { ...BASE_TASK, frequency: { unit: "day", value: 3 }, lastChecked: undefined } as Task;
+    const t3 = { ...BASE_TASK, frequency: { unit: "month", value: 1 }, lastChecked: undefined } as Task;
     const arr = [t1, t2, t3];
     const sorted = [...arr].sort(unCheckedTasksSortFunction);
     expect(sorted[0]).toBe(t2); // day (3 days)
@@ -90,8 +90,8 @@ describe("unCheckedTasksSortFunction", () => {
   });
 
   it("returns 0 for tasks with same frequency", () => {
-    const t1 = { ...BASE_TASK, frequency: { unit: "day", value: 1 }, lastChecked: undefined };
-    const t2 = { ...BASE_TASK, frequency: { unit: "day", value: 1 }, lastChecked: undefined };
+    const t1 = { ...BASE_TASK, frequency: { unit: "day", value: 1 }, lastChecked: undefined } as Task;
+    const t2 = { ...BASE_TASK, frequency: { unit: "day", value: 1 }, lastChecked: undefined } as Task;
     expect(unCheckedTasksSortFunction(t1, t2)).toBe(0);
   });
 });

@@ -1,44 +1,150 @@
-openapi: 3.0.3
+openapi: 3.0.1
 info:
   title: Task API
   version: 1.0.0
+servers:
+- url: https://6s6jd82e80.execute-api.eu-north-1.amazonaws.com/preprod
 paths:
   /tasks:
     get:
-      summary: Get all tasks
       responses:
         "200":
           description: List of tasks
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/Task"
-    post:
-      summary: Create a new task
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/NewTask"
-      responses:
-        "201":
-          description: Task created
+                $ref: '#/components/schemas/ArrayOfTask'
     put:
       summary: Update a task
       requestBody:
-        required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/UpdateTask"
+              $ref: '#/components/schemas/UpdateTask'
+        required: true
       responses:
         "200":
           description: Task updated
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+          content: {}
+      x-codegen-request-body-name: UpdateTask
+    post:
+      summary: Create a new task
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewTask'
+        required: true
+      responses:
+        "201":
+          description: Task created
+          content: {}
+      x-codegen-request-body-name: NewTask
+    options:
+      responses:
+        "200":
+          description: CORS preflight response
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+            Access-Control-Allow-Methods:
+              schema:
+                type: string
+            Access-Control-Allow-Headers:
+              schema:
+                type: string
+          content: {}
+  /tasks/{id}:
+    delete:
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "204":
+          description: Task deleted
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+            Access-Control-Allow-Methods:
+              schema:
+                type: string
+            Access-Control-Allow-Headers:
+              schema:
+                type: string
+          content: {}
+    options:
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: CORS preflight response
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+            Access-Control-Allow-Methods:
+              schema:
+                type: string
+            Access-Control-Allow-Headers:
+              schema:
+                type: string
+          content: {}
 components:
   schemas:
+    UpdateTask:
+      type: object
+      required: [checked, id]
+      properties:
+        id:
+          type: string
+        checked:
+          type: boolean
+        lastChecked:
+          type: string
+          format: date-time
+    NewTask:
+      type: object
+      required: [title, frequency]
+      properties:
+        title:
+          type: string
+        frequency:
+          type: object
+          required: [unit, value]
+          properties:
+            value:
+              minimum: 1
+              type: integer
+              format: int32
+            unit:
+              type: string
+              enum: [day, week, month, year]
+        tags:
+          type: array
+          items:
+            type: string
+            enum: [maison, jardin, vélos, voiture]
+    ArrayOfTask:
+      type: array
+      items:
+        $ref: '#/components/schemas/Task'
     Task:
       type: object
       required: [id, title, checked, frequency]
@@ -54,48 +160,17 @@ components:
           format: date-time
         frequency:
           type: object
+          required: [value, unit]
           properties:
             value:
-              type: integer
               minimum: 1
+              type: integer
+              format: int32
             unit:
               type: string
               enum: [day, week, month, year]
-          required: [value, unit]
         tags:
           type: array
           items:
             type: string
             enum: [maison, jardin, vélos, voiture]
-    NewTask:
-      type: object
-      required: [title, frequency]
-      properties:
-        title:
-          type: string
-        frequency:
-          type: object
-          properties:
-            value:
-              type: integer
-              minimum: 1
-            unit:
-              type: string
-              enum: [day, week, month, year]
-          required: [value, unit]
-        tags:
-          type: array
-          items:
-            type: string
-            enum: [maison, jardin, vélos, voiture]
-    UpdateTask:
-      type: object
-      required: [id, checked]
-      properties:
-        id:
-          type: string
-        checked:
-          type: boolean
-        lastChecked:
-          type: string
-          format: date-time
