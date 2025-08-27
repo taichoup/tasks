@@ -36,7 +36,7 @@ export default function App() {
   return (
     <>
       <header>
-        <h1>Task App</h1>
+        <h1>Tasks App</h1>
       </header>
       <main>
         <div className={styles.addTaskForm}>
