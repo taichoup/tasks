@@ -19,3 +19,9 @@
 .taskList li:hover {
     background: #f0f0f0;
 }
+
+@media (max-width: 600px) {
+    .wrapper {
+        flex-direction: column;
+    }
+}

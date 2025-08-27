@@ -9,7 +9,6 @@
 
 .numberInput {
   width: 50px;
-  /* height: 1.5rem; */
 }
 
 .addTaskForm select, button {
@@ -23,4 +22,10 @@
 header {
   text-align: center;
   margin-bottom: 16px;
+}
+
+@media (max-width: 600px) {
+  .addTaskForm {
+    flex-wrap: wrap;
+  }
 }
