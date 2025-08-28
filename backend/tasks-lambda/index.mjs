@@ -71,10 +71,13 @@ export const handler = async (event) => {
         tasks = tasks.map((task) => {
             if (task.checked && task.lastChecked) {
                 const last = new Date(task.lastChecked);
+
+                // TODO: switcher vers une logique où on calcule la date d'échéance, mais on tronque à minuit et 1s
                 const diffDaysEffective = (now.getTime() - last.getTime()) / (1000 * 60 * 60 * 24);
                 const diffDaysAllowed = task.frequency.value * unitToDaysMap[task.frequency.unit];
 
-                const shouldUncheck = diffDaysEffective >= diffDaysAllowed;
+                // const shouldUncheck = diffDaysEffective >= diffDaysAllowed;
+                const shouldUncheck = Math.floor(diffDaysEffective) >= diffDaysAllowed; // test Aug 24: compare dates instead of comparing durations.
 
                 if (shouldUncheck) {
                     console.log('Unchecking task %s', task.title);

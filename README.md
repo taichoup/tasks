@@ -8,7 +8,7 @@ TS + React + Vite + AWS (Lambdas, DynamoDB)
 npm run dev # local server
 npm run test # unit tests
 npm run generate:types # generate TS typings (in shared folder) based on API spec (openapi.yaml)
-npm run push:lambda # zip the lambda function and deploy it to aws (needs AWS CLI config)
+npm run push:lambda # zip the lambda function and deploy it to aws (needs AWS CLI installed and configured)
 ```
 
 ## Some useful documentation
