@@ -1,5 +1,5 @@
 // This Lambda is meant to be triggered on a schedule (e.g. weekly) to send an email digest of upcoming tasks.
-// It's a draft by Codex, (March 29, 2026) currently not set up at all in AWS, and not tested in the least.
+// It's a draft by Codex, I've set it up in AWS (TaskDigest) but the priority logic needs work.
 
 import { DynamoDBClient, ScanCommand } from "@aws-sdk/client-dynamodb";
 import { SESClient, SendEmailCommand } from "@aws-sdk/client-ses";
