@@ -3,6 +3,7 @@ import type { components } from "../../shared/generated-types";
 import { deleteTask, toggleTask } from "../api/requests";
 import styles from './Task.module.css';
 import { Tag } from "./Tag";
+import { DAY_IN_MS, MONTH_IN_MS, WEEK_IN_MS, YEAR_IN_MS, HOUR_IN_MS, MINUTE_IN_MS } from "../utils/constants";
 
 type Task = components["schemas"]["Task"];
 type TaskFrequencyUnit = components["schemas"]["Task"]["frequency"]["unit"];
@@ -37,6 +38,7 @@ export const Task = ({ task }: TaskProps) => {
         }
     });
 
+    // TODO: extract to utility function
     const getLocalizedUnit = (unitInEnglish: TaskFrequencyUnit, value: number) => {
         const translations: Record<TaskFrequencyUnit, string> = {
             day: "jour",
@@ -62,10 +64,36 @@ export const Task = ({ task }: TaskProps) => {
         day: "numeric",
     } satisfies Intl.DateTimeFormatOptions;
 
-    const lastCheckedDate = task.lastChecked ? new Intl.DateTimeFormat('fr-FR', dateFormatOptions).format(new Date(task.lastChecked)) : null;
+    const lastCheckedDateDisplayString = task.lastChecked ? new Intl.DateTimeFormat('fr-FR', dateFormatOptions).format(new Date(task.lastChecked)) : null;
+
+    const timeRemainingUntilUncheck = task.lastChecked && task.frequency
+        // TODO: extract to utility function
+        ? (() => {
+            const lastChecked = new Date(task.lastChecked);
+            const now = new Date();
+            const frequencyInMs = {
+                day: DAY_IN_MS,
+                week: WEEK_IN_MS,
+                month: MONTH_IN_MS,
+                year: YEAR_IN_MS,
+            }[task.frequency.unit] * task.frequency.value;
+
+            const nextUncheckTime = new Date(lastChecked.getTime() + frequencyInMs);
+            const timeDiff = nextUncheckTime.getTime() - now.getTime();
+
+            const remainingDuration = {
+                days: Math.floor(timeDiff / DAY_IN_MS),
+                hours: Math.floor((timeDiff % DAY_IN_MS) / HOUR_IN_MS),
+                minutes: Math.floor((timeDiff % HOUR_IN_MS) / MINUTE_IN_MS),
+            };
+
+            // TODO: update typings?
+            return new Intl.DurationFormat('fr', { style: 'long' }).format(remainingDuration);
+        })()
+        : null;
 
     return (
-        <li key={task.id}>
+        <li key={task.id} title={`À refaire dans: ${timeRemainingUntilUncheck}`}>
             <div className={styles.taskDetails}>
                 <label>
                     <input
@@ -77,8 +105,9 @@ export const Task = ({ task }: TaskProps) => {
                     <strong>{task.title}</strong>
                 </label>
                 <span className={styles.taskDetailsItem}>{getLocalizedUnit(task.frequency?.unit, task.frequency.value)}</span>
-                <span className={styles.taskDetailsItem}>{task.lastChecked ? `Effectué pour la dernière fois le ${lastCheckedDate}` : ''}</span>
+                <span className={styles.taskDetailsItem}>{task.lastChecked ? `Effectué pour la dernière fois le ${lastCheckedDateDisplayString}` : ''}</span>
                 <span className={styles.taskDetailsItem}>{task.tags && task.tags.length > 0 ? <Tag label={task.tags[0]} /> : null}</span>
+                {/* <span className={styles.taskDetailsItem}>{timeRemainingUntilUncheck ? `Temps restant avant décochage: ${timeRemainingUntilUncheck}` : ''}</span> */}
             </div>
             <button
                 onClick={() => deleteMutation.mutate()}

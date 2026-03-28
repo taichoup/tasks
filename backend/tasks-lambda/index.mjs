@@ -6,12 +6,14 @@ import {
     UpdateItemCommand
 } from "@aws-sdk/client-dynamodb";
 import { DeleteCommand } from "@aws-sdk/lib-dynamodb";
+import { SESClient, SendEmailCommand } from "@aws-sdk/client-ses";
 import { randomUUID } from "crypto";
 /**
  * @typedef {import("../shared/types").Task} Task
  */
 
-const client = new DynamoDBClient({ region: "eu-north-1" });
+const DBClient = new DynamoDBClient({ region: "eu-north-1" });
+const mailClient = new SESClient({ region: "eu-north-1" });
 
 async function deleteTask(taskId) {
     try {
@@ -24,7 +26,7 @@ async function deleteTask(taskId) {
             ConditionExpression: "attribute_exists(id)",
         });
 
-        const result = await client.send(command);
+        const result = await DBClient.send(command);
         console.log("DEBUG: Deleted task:", taskId, result);
         return result;
     } catch (err) {
@@ -37,12 +39,43 @@ async function deleteTask(taskId) {
     }
 }
 
+async function sendEmail(to, subject, body) {
+    const params = {
+        Destination: {
+            ToAddresses: [to],
+        },
+        Message: {
+            Body: {
+                Text: {
+                    Data: body,
+                },
+            },
+            Subject: {
+                Data: subject,
+            },
+        },
+        Source: "tasks@moulindelingoult.fr",
+    };
+
+    try {
+        const data = await mailClient.send(new SendEmailCommand(params));
+        console.log("Email sent successfully:", data);
+        return data;
+    } catch (err) {
+        console.error("Error sending email:", err);
+        throw err;
+    }
+};
+
 export const handler = async (event) => {
     const method = event.requestContext?.http?.method || event.httpMethod;
 
     if (method === "GET") {
-        const data = await client.send(new ScanCommand({ TableName: "tasks" }));
+        const data = await DBClient.send(new ScanCommand({ TableName: "tasks" }));
         const now = new Date();
+
+        // TEST
+        // sendEmail('dallemanuel@gmail.com', 'Task unchecked', `Task unchecked: blablabla`);
 
         // Convert raw DynamoDB items to Task[]
         let tasks = data.Items?.map((item) => ({
@@ -77,12 +110,16 @@ export const handler = async (event) => {
                 const diffDaysAllowed = task.frequency.value * unitToDaysMap[task.frequency.unit];
 
                 // const shouldUncheck = diffDaysEffective >= diffDaysAllowed;
-                const shouldUncheck = Math.floor(diffDaysEffective) >= diffDaysAllowed; // test Aug 24: compare dates instead of comparing durations.
+                // THis isn't working... Well it is but it doesn't reset at midnight, it resets at the same time of day that it was checked initially
+                // one solution would be to compare dates instead of comparing durations. (but then would we need to worry about the TZ, I wonder?)
+                // or maybe have the front-end "pretend" that everything is checked at 00:01 am - meh.
+                const shouldUncheck = Math.floor(diffDaysEffective) >= diffDaysAllowed; 
 
                 if (shouldUncheck) {
                     console.log('Unchecking task %s', task.title);
                     task.checked = false;
                     tasksToUpdate.push(task);
+                    sendEmail('dallemanuel@gmail.com', 'Task unchecked', `Task unchecked: ${task.title}`);
                 }
             }
             return task;
@@ -90,7 +127,7 @@ export const handler = async (event) => {
 
         // Persist unchecked tasks
         for (const task of tasksToUpdate) {
-            await client.send(
+            await DBClient.send(
                 new UpdateItemCommand({
                     TableName: "tasks",
                     Key: { id: { S: task.id } },
@@ -117,7 +154,7 @@ export const handler = async (event) => {
     if (method === "POST") {
         const body = JSON.parse(event.body);
         console.log("DEBUG: body", body);
-        await client.send(
+        await DBClient.send(
             new PutItemCommand({
                 TableName: "tasks",
                 Item: {
@@ -146,7 +183,7 @@ export const handler = async (event) => {
 
     if (method === "PUT") {
         const body = JSON.parse(event.body);
-        await client.send(
+        await DBClient.send(
             new UpdateItemCommand({
                 TableName: "tasks",
                 Key: { id: { S: body.id } },
