@@ -1,8 +1,13 @@
-- needs a dev db and a proper dev flow: it should be able to run in prod or dev mode, and not on the same db
 - needs some sort of contract between back and front. I did add an OpenAPI thing but am not sure how it works. We need schema validation on the lambda side, too. Look at Request Validator in API Gateway, for every method's method request section. Maybe that's a good lead.
 - needs something more robust for CORS, so as not to have to allow *
 - add a filter based on tags.
 - use Zod for schema validation and typing generation?
+
+- update Mar 29: dev/live separation is now in place in a first version
+    - separate dev lambda: `TasksHandlerDev`
+    - separate dev DynamoDB table: `tasks-dev`
+    - separate dev API Gateway
+    - frontend can point to dev via `VITE_API_URL`
 
 
 - update Oct 8: the email is working now (I think) when a task gets unchecked (although there is still this annoying behavior that the unchecking only happens at best exactly at the same hour as the check. (can be later if I don' go see the site since this happens only when there is a GET request))

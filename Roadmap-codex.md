@@ -4,25 +4,22 @@ This file turns the ideas from [ROADMAP.md](/Users/manu/Documents/repos/tasks/RO
 
 ## 1. Environment separation and dev flow
 
-Highest priority.
+Completed in a first usable version.
 
-Right now the app is still wired directly to deployed infrastructure:
+What is now in place:
 
-- The frontend hardcodes the API URL in [src/api/requests.ts](/Users/manu/Documents/repos/tasks/src/api/requests.ts).
-- The lambda hardcodes region, table name, and email settings in [backend/tasks-lambda/index.mjs](/Users/manu/Documents/repos/tasks/backend/tasks-lambda/index.mjs).
+- frontend override via `VITE_API_URL`
+- backend env vars for table/region/email config
+- separate dev Lambda (`TasksHandlerDev`)
+- separate dev DynamoDB table (`tasks-dev`)
+- separate dev API Gateway
+- updated docs for the dev/live split
 
-Recommended improvements:
+What may still be worth improving later:
 
-- Add `VITE_API_URL` for the frontend.
-- Add `TASKS_TABLE_NAME`, `AWS_REGION`, `EMAIL_FROM`, and `EMAIL_TO` for the backend.
-- Document `dev`, `preprod`, and `prod` setup in [README.md](/Users/manu/Documents/repos/tasks/README.md) and [AWS.md](/Users/manu/Documents/repos/tasks/AWS.md).
-- Create a separate dev DynamoDB table and avoid sharing prod/preprod data during local work.
-
-Why this matters:
-
-- It reduces deployment risk.
-- It makes testing easier.
-- It unlocks safer iteration on the lambda and scheduler behavior.
+- make live/dev deployment scripts and naming even more consistent
+- document the exact dev API URL and AWS resources in one place
+- decide whether the old live API Gateway stage should keep the historical `preprod` name
 
 ## 2. Make the API contract real
 
@@ -194,18 +191,16 @@ Why this matters:
 
 ## Suggested implementation order
 
-1. Environment variables and dev/prod separation.
-2. Runtime validation in the lambda.
-3. Make `GET /tasks` read-only and move unchecking fully to the scheduler.
-4. Fix frontend async request handling and remove the delete delay hack.
-5. Add tag filtering.
-6. Expand tests around backend behavior and scheduling.
+1. Runtime validation in the lambda.
+2. Make `GET /tasks` read-only and move unchecking fully to the scheduler.
+3. Fix frontend async request handling and remove the delete delay hack.
+4. Add tag filtering.
+5. Expand tests around backend behavior and scheduling.
 
 ## Short version
 
 If only a few things get done soon, the best ones are:
 
-- separate dev and prod configuration,
 - validate request bodies at runtime,
 - remove side effects from `GET /tasks`,
 - and fix the frontend request helpers so they behave consistently.

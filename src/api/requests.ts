@@ -2,8 +2,11 @@
 import { type components } from '../../shared/generated-types';
 import type { Task } from '../types/derived';
 
-const API_GATEWAY_ID = "6s6jd82e80";
-const API_URL = `https://${API_GATEWAY_ID}.execute-api.eu-north-1.amazonaws.com/preprod/tasks`
+// Historical note: the old live API Gateway stage is still named "preprod".
+// Local development should usually override this with VITE_API_URL and point
+// to the separate dev API Gateway.
+const DEFAULT_API_URL = "https://6s6jd82e80.execute-api.eu-north-1.amazonaws.com/preprod/tasks";
+const API_URL = import.meta.env.VITE_API_URL || DEFAULT_API_URL;
 
 // Fetch tasks from API
 export async function fetchTasks() {

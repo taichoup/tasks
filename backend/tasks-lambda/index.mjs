@@ -12,13 +12,18 @@ import { randomUUID } from "crypto";
  * @typedef {import("../shared/types").Task} Task
  */
 
-const DBClient = new DynamoDBClient({ region: "eu-north-1" });
-const mailClient = new SESClient({ region: "eu-north-1" });
+const AWS_REGION = process.env.AWS_REGION || "eu-north-1";
+const TASKS_TABLE_NAME = process.env.TASKS_TABLE_NAME || "tasks";
+const EMAIL_FROM = process.env.EMAIL_FROM || "tasks@moulindelingoult.fr";
+const EMAIL_TO = process.env.EMAIL_TO || "dallemanuel@gmail.com";
+
+const DBClient = new DynamoDBClient({ region: AWS_REGION });
+const mailClient = new SESClient({ region: AWS_REGION });
 
 async function deleteTask(taskId) {
     try {
         const command = new DeleteCommand({
-            TableName: "tasks",
+            TableName: TASKS_TABLE_NAME,
             Key: {
                 id: taskId,
             },
@@ -54,7 +59,7 @@ async function sendEmail(to, subject, body) {
                 Data: subject,
             },
         },
-        Source: "tasks@moulindelingoult.fr",
+        Source: EMAIL_FROM,
     };
 
     try {
@@ -71,7 +76,7 @@ export const handler = async (event) => {
     const method = event.requestContext?.http?.method || event.httpMethod;
 
     if (method === "GET") {
-        const data = await DBClient.send(new ScanCommand({ TableName: "tasks" }));
+        const data = await DBClient.send(new ScanCommand({ TableName: TASKS_TABLE_NAME }));
         const now = new Date();
 
         // TEST
@@ -119,7 +124,7 @@ export const handler = async (event) => {
                     console.log('Unchecking task %s', task.title);
                     task.checked = false;
                     tasksToUpdate.push(task);
-                    sendEmail('dallemanuel@gmail.com', 'Task unchecked', `Task unchecked: ${task.title}`);
+                    sendEmail(EMAIL_TO, 'Task unchecked', `Task unchecked: ${task.title}`);
                 }
             }
             return task;
@@ -129,7 +134,7 @@ export const handler = async (event) => {
         for (const task of tasksToUpdate) {
             await DBClient.send(
                 new UpdateItemCommand({
-                    TableName: "tasks",
+                    TableName: TASKS_TABLE_NAME,
                     Key: { id: { S: task.id } },
                     UpdateExpression: "SET checked = :checked, lastChecked = :lastChecked",
                     ExpressionAttributeValues: {
@@ -156,7 +161,7 @@ export const handler = async (event) => {
         console.log("DEBUG: body", body);
         await DBClient.send(
             new PutItemCommand({
-                TableName: "tasks",
+                TableName: TASKS_TABLE_NAME,
                 Item: {
                     id: { S: randomUUID() },
                     title: { S: body.title },
@@ -185,7 +190,7 @@ export const handler = async (event) => {
         const body = JSON.parse(event.body);
         await DBClient.send(
             new UpdateItemCommand({
-                TableName: "tasks",
+                TableName: TASKS_TABLE_NAME,
                 Key: { id: { S: body.id } },
                 UpdateExpression: "SET checked = :checked, lastChecked = :lastChecked",
                 ExpressionAttributeValues: {
