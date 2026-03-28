@@ -11,10 +11,13 @@
     "generate:types": "openapi-typescript ./backend/openapi.yaml --output ./shared/generated-types.ts",
     "test": "vitest",
     "build:lambda": "mkdir -p dist && cd backend/tasks-lambda && zip ../../dist/tasks-lambda.zip index.mjs",
+    "build:lambda:digest": "mkdir -p dist && cd backend/task-digest-lambda && zip ../../dist/task-digest-lambda.zip index.mjs",
     "deploy:lambda": "aws lambda update-function-code --function-name TasksHandler --zip-file fileb://dist/tasks-lambda.zip --region eu-north-1",
     "deploy:lambda-dev": "aws lambda update-function-code --function-name TasksHandlerDev --zip-file fileb://dist/tasks-lambda.zip --region eu-north-1",
+    "deploy:lambda:digest": "aws lambda update-function-code --function-name TaskDigest --zip-file fileb://dist/task-digest-lambda.zip --region eu-north-1",
     "push:lambda": "npm run build:lambda && npm run deploy:lambda",
-    "push:lambda-dev": "npm run build:lambda && npm run deploy:lambda-dev"
+    "push:lambda-dev": "npm run build:lambda && npm run deploy:lambda-dev",
+    "push:lambda:digest": "npm run build:lambda:digest && npm run deploy:lambda:digest"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.85.3",
