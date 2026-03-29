@@ -30,8 +30,7 @@ function normalizeTask(item) {
     return {
         id: item.id.S,
         title: item.title.S,
-        checked: item.checked.BOOL,
-        lastChecked: item.lastChecked?.S || "",
+        checkedAt: item.checkedAt?.S || item.lastChecked?.S || "",
         frequency: {
             value: parseInt(item.frequency.M.value.N, 10),
             unit: item.frequency.M.unit.S,
@@ -42,7 +41,7 @@ function normalizeTask(item) {
 
 function buildPriorityView(task, now) {
     const recurrenceDays = convertFrequencyToDays(task);
-    const isDueNow = !task.checked || !task.lastChecked;
+    const isDueNow = !task.checkedAt;
 
     if (isDueNow) {
         return {
@@ -53,8 +52,8 @@ function buildPriorityView(task, now) {
         };
     }
 
-    const lastChecked = new Date(task.lastChecked);
-    const nextDueAt = new Date(lastChecked.getTime() + recurrenceDays * DAY_IN_MS);
+    const checkedAt = new Date(task.checkedAt);
+    const nextDueAt = new Date(checkedAt.getTime() + recurrenceDays * DAY_IN_MS);
     const msUntilDue = nextDueAt.getTime() - now.getTime();
     const daysUntilDue = Math.ceil(msUntilDue / DAY_IN_MS);
 

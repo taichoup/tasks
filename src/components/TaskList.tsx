@@ -19,12 +19,9 @@ export function TaskList() {
     return <div>Error loading tasks</div>;
   }
 
-
-  // Sort: tasks without lastChecked first, by descending frequency, then the checked tasks by descending lastChecked date
-  // TODO: improve. no lastChecked means "was never checked", not "is currently unchecked" ?
-  const uncheckedTasks = (tasks ?? []).filter(t => !t.lastChecked);
+  const uncheckedTasks = (tasks ?? []).filter(t => !t.checkedAt);
   const sortedUncheckedTasks = [...(uncheckedTasks ?? [])].sort(unCheckedTasksSortFunction);
-  const checkedTasks = (tasks ?? []).filter(t => t.lastChecked);
+  const checkedTasks = (tasks ?? []).filter(t => t.checkedAt);
   const sortedCheckedTasks = [...(checkedTasks ?? [])].sort(CheckedTasksSortFunction);
   // const sortedTasks = sortedUncheckedTasks.concat(sortedCheckedTasks);
 

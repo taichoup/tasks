@@ -110,15 +110,12 @@ components:
   schemas:
     UpdateTask:
       type: object
-      required: [checked, id]
+      required: [id, checkedAt]
       properties:
         id:
           type: string
-        checked:
-          type: boolean
-        lastChecked:
+        checkedAt:
           type: string
-          format: date-time
     NewTask:
       type: object
       required: [title, frequency]
@@ -147,17 +144,14 @@ components:
         $ref: '#/components/schemas/Task'
     Task:
       type: object
-      required: [id, title, checked, frequency]
+      required: [id, title, checkedAt, frequency]
       properties:
         id:
           type: string
         title:
           type: string
-        checked:
-          type: boolean
-        lastChecked:
+        checkedAt:
           type: string
-          format: date-time
         frequency:
           type: object
           required: [value, unit]

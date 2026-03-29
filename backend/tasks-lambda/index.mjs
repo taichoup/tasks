@@ -84,8 +84,7 @@ export const handler = async (event) => {
         let tasks = data.Items?.map((item) => ({
             id: item.id.S,
             title: item.title.S,
-            checked: item.checked.BOOL,
-            lastChecked: item.lastChecked?.S,
+            checkedAt: item.checkedAt?.S || item.lastChecked?.S || "",
             frequency: {
                 value: parseInt(item.frequency.M.value.N, 10),
                 unit: item.frequency.M.unit.S
@@ -105,8 +104,8 @@ export const handler = async (event) => {
             year: DAYS_IN_YEAR,
         };
         tasks = tasks.map((task) => {
-            if (task.checked && task.lastChecked) {
-                const last = new Date(task.lastChecked);
+            if (task.checkedAt) {
+                const last = new Date(task.checkedAt);
 
                 // TODO: switcher vers une logique où on calcule la date d'échéance, mais on tronque à minuit et 1s
                 const diffDaysEffective = (now.getTime() - last.getTime()) / (1000 * 60 * 60 * 24);
@@ -120,7 +119,7 @@ export const handler = async (event) => {
 
                 if (shouldUncheck) {
                     console.log('Unchecking task %s', task.title);
-                    task.checked = false;
+                    task.checkedAt = "";
                     tasksToUpdate.push(task);
                     sendEmail(EMAIL_TO, 'Task unchecked', `Task unchecked: ${task.title}`);
                 }
@@ -134,10 +133,9 @@ export const handler = async (event) => {
                 new UpdateItemCommand({
                     TableName: TASKS_TABLE_NAME,
                     Key: { id: { S: task.id } },
-                    UpdateExpression: "SET checked = :checked, lastChecked = :lastChecked",
+                    UpdateExpression: "SET checkedAt = :checkedAt REMOVE checked, lastChecked",
                     ExpressionAttributeValues: {
-                        ":checked": { BOOL: false },
-                        ":lastChecked": { S: "" }
+                        ":checkedAt": { S: "" }
                     }
                 })
             );
@@ -167,8 +165,7 @@ export const handler = async (event) => {
                 Item: {
                     id: { S: randomUUID() },
                     title: { S: body.title },
-                    checked: { BOOL: false },
-                    lastChecked: { S: "" },
+                    checkedAt: { S: "" },
                     frequency: {
                         M: {
                             unit: { S: body.frequency.unit },
@@ -194,14 +191,14 @@ export const handler = async (event) => {
         const validatedBody = updateTaskSchema.safeParse(parsedBody.data);
         if (!validatedBody.success) return validationErrorResponse(validatedBody.error);
         const body = validatedBody.data;
+        const checkedAt = body.checkedAt ?? body.lastChecked ?? "";
         await DBClient.send(
             new UpdateItemCommand({
                 TableName: TASKS_TABLE_NAME,
                 Key: { id: { S: body.id } },
-                UpdateExpression: "SET checked = :checked, lastChecked = :lastChecked",
+                UpdateExpression: "SET checkedAt = :checkedAt REMOVE checked, lastChecked",
                 ExpressionAttributeValues: {
-                    ":checked": { BOOL: body.checked },
-                    ":lastChecked": { S: body.lastChecked || "" }
+                    ":checkedAt": { S: checkedAt }
                 }
             })
         );

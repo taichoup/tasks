@@ -26,6 +26,16 @@ Typical local setup:
 
 If `VITE_API_URL` is not set, the app falls back to the old live URL hardcoded in the frontend.
 
+## Task state semantics
+
+The backend now uses `checkedAt` as the meaningful current-state field:
+
+- `checkedAt` present -> task is currently checked
+- `checkedAt` empty -> task is currently due
+- scheduled unchecking clears `checkedAt`
+
+Legacy records may still contain `lastChecked` / `checked`, but the backend only keeps them for compatibility while the migration settles.
+
 
 ## Deploying
 
@@ -33,6 +43,8 @@ When modifying Lambda code:
 
 - live: `npm run push:lambda`
 - dev: `npm run push:lambda-dev`
+- auto-uncheck: `npm run push:lambda:uncheck`
+- digest: `npm run push:lambda:digest`
 
 When modifying API Gateway settings:
 

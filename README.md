@@ -29,6 +29,16 @@ The main routing lambda has been split into smaller files:
 - `http.mjs`: JSON parsing and validation error helpers
 - `config.mjs`: env-based config
 
+## Task state model
+
+The project now treats `checkedAt` as the source of truth for current task state:
+
+- `checkedAt = ""` means the task is currently due
+- `checkedAt = ISO timestamp` means the task is currently checked since that moment
+- when a task expires, `checkedAt` is cleared again
+
+This is intentionally not a long-term completion history model.
+
 ## Lambda packaging
 
 Lambda packaging is no longer just a single-file zip.

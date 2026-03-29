@@ -64,12 +64,12 @@ export const Task = ({ task }: TaskProps) => {
         day: "numeric",
     } satisfies Intl.DateTimeFormatOptions;
 
-    const lastCheckedDateDisplayString = task.lastChecked ? new Intl.DateTimeFormat('fr-FR', dateFormatOptions).format(new Date(task.lastChecked)) : null;
+    const checkedAtDateDisplayString = task.checkedAt ? new Intl.DateTimeFormat('fr-FR', dateFormatOptions).format(new Date(task.checkedAt)) : null;
 
-    const timeRemainingUntilUncheck = task.lastChecked && task.frequency
+    const timeRemainingUntilUncheck = task.checkedAt && task.frequency
         // TODO: extract to utility function
         ? (() => {
-            const lastChecked = new Date(task.lastChecked);
+            const checkedAt = new Date(task.checkedAt);
             const now = new Date();
             const frequencyInMs = {
                 day: DAY_IN_MS,
@@ -78,7 +78,7 @@ export const Task = ({ task }: TaskProps) => {
                 year: YEAR_IN_MS,
             }[task.frequency.unit] * task.frequency.value;
 
-            const nextUncheckTime = new Date(lastChecked.getTime() + frequencyInMs);
+            const nextUncheckTime = new Date(checkedAt.getTime() + frequencyInMs);
             const timeDiff = nextUncheckTime.getTime() - now.getTime();
 
             const remainingDuration = {
@@ -87,7 +87,6 @@ export const Task = ({ task }: TaskProps) => {
                 minutes: Math.floor((timeDiff % HOUR_IN_MS) / MINUTE_IN_MS),
             };
 
-            // TODO: update typings?
             return new Intl.DurationFormat('fr', { style: 'long' }).format(remainingDuration);
         })()
         : null;
@@ -98,14 +97,14 @@ export const Task = ({ task }: TaskProps) => {
                 <label>
                     <input
                         type="checkbox"
-                        checked={task.checked}
+                        checked={Boolean(task.checkedAt)}
                         onChange={() => toggleMutation.mutate()}
                         disabled={toggleMutation.isPending}
                     />
                     <strong>{task.title}</strong>
                 </label>
                 <span className={styles.taskDetailsItem}>{getLocalizedUnit(task.frequency?.unit, task.frequency.value)}</span>
-                <span className={styles.taskDetailsItem}>{task.lastChecked ? `Effectué pour la dernière fois le ${lastCheckedDateDisplayString}` : ''}</span>
+                <span className={styles.taskDetailsItem}>{task.checkedAt ? `Fait depuis le ${checkedAtDateDisplayString}` : ''}</span>
                 <span className={styles.taskDetailsItem}>{task.tags && task.tags.length > 0 ? <Tag label={task.tags[0]} /> : null}</span>
                 {/* <span className={styles.taskDetailsItem}>{timeRemainingUntilUncheck ? `Temps restant avant décochage: ${timeRemainingUntilUncheck}` : ''}</span> */}
             </div>
