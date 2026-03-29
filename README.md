@@ -22,9 +22,15 @@ The repo now contains three backend Lambdas:
 - `backend/task-auto-uncheck-lambda/`: scheduled auto-uncheck lambda (`TaskAutoUncheck`)
 - `backend/task-digest-lambda/`: scheduled weekly digest lambda (`TaskDigest`)
 
+The responsibilities are now separated more cleanly:
+
+- `TasksHandler` is read/write HTTP routing only
+- `TaskAutoUncheck` owns recurring expiry and uncheck emails
+- `TaskDigest` owns the scheduled weekly digest email
+
 The main routing lambda has been split into smaller files:
 
-- `index.mjs`: main handler and DynamoDB/SES flow
+- `index.mjs`: main HTTP handler and DynamoDB CRUD flow
 - `schemas.mjs`: Zod request schemas
 - `http.mjs`: JSON parsing and validation error helpers
 - `config.mjs`: env-based config

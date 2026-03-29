@@ -54,63 +54,46 @@ Why this matters:
 - It aligns the frontend and backend around one contract instead of “spec + hope”.
 - It will make future features like filtering easier to add safely.
 
-## 3. Finish separating unchecking from GET /tasks
+## 3. Keep unchecking separated from GET /tasks
 
-This is the biggest backend design improvement.
+Completed for the main routing path.
 
-At the moment, `GET /tasks` does more than read:
+What is now in place:
 
-- it scans tasks,
-- computes which tasks should be unchecked,
-- updates DynamoDB,
-- and sends emails.
+- `GET /tasks` in [backend/tasks-lambda/index.mjs](/Users/manu/Documents/repos/tasks/backend/tasks-lambda/index.mjs) is read-only again
+- recurring expiry and uncheck emails live in [backend/task-auto-uncheck-lambda/index.mjs](/Users/manu/Documents/repos/tasks/backend/task-auto-uncheck-lambda/index.mjs)
+- the weekly digest has its own scheduled lambda in [backend/task-digest-lambda/index.mjs](/Users/manu/Documents/repos/tasks/backend/task-digest-lambda/index.mjs)
 
-That logic currently lives in [backend/tasks-lambda/index.mjs](/Users/manu/Documents/repos/tasks/backend/tasks-lambda/index.mjs).
+What may still be worth improving later:
 
-Recommended improvements:
+- extract shared task mapping / frequency/date helpers into a common module
+- make the scheduler path more explicit and better documented in AWS notes
+- consider idempotency so a scheduler retry does not send duplicate notifications
+- add clearer logging around scheduled runs
 
-- Make `GET /tasks` read-only.
-- Move all unchecking and email sending to the scheduled lambda / EventBridge path.
-- Extract shared logic into a common module:
-  - task mapping from DynamoDB items,
-  - frequency/date calculations,
-  - “should uncheck” logic,
-  - email payload construction.
+Why this still matters:
 
-Additional backend cleanup:
+- The separation is now healthier, but scheduled behavior is still an area worth hardening and testing.
 
-- `sendEmail(...)` should be awaited where failure matters.
-- Add clear logging around scheduled runs.
-- Consider idempotency so a scheduler retry does not send duplicate notifications.
+## 4. Frontend request handling cleanup
 
-Why this matters:
+Completed in the current API layer.
 
-- Reads should not mutate state.
-- The current behavior depends on traffic timing.
-- A dedicated scheduled flow is easier to reason about and test.
+What is now in place:
 
-## 4. Fix async request handling in the frontend
+- `toggleTask` no longer triggers a redundant follow-up `GET`
+- `deleteTask` awaits the server response and propagates failures properly
+- the old delete-delay workaround in [src/components/Task.tsx](/Users/manu/Documents/repos/tasks/src/components/Task.tsx) is gone
 
-There are a couple of small but important reliability issues in the frontend API layer:
+What may still be worth improving later:
 
-- `deleteTask` does not await the `fetch`.
-- `deleteTask` also swallows server errors.
-- `toggleTask` calls `fetchTasks()` after the update, but the result is not used.
-
-This likely explains the workaround in [src/components/Task.tsx](/Users/manu/Documents/repos/tasks/src/components/Task.tsx) where deletion waits 300ms before invalidating the query.
-
-Recommended improvements:
-
-- Make all request helpers consistently `await` the response.
-- Throw on non-OK responses.
-- Let React Query handle refetching/invalidation.
-- Remove the artificial `setTimeout` once delete behavior is reliable.
+- add mutation-level tests around add/toggle/delete flows
+- consider optimistic updates if the UI ever feels sluggish
 
 Why this matters:
 
-- It removes race conditions.
-- It simplifies the UI code.
-- It makes user actions feel more predictable.
+- The request helpers now behave more predictably.
+- React Query is back to being the source of truth for refetching.
 
 ## 5. Centralize date and frequency logic
 
@@ -223,15 +206,15 @@ Why this matters:
 
 ## Suggested implementation order
 
-1. Make `GET /tasks` read-only and move unchecking fully to the scheduler.
-2. Fix frontend async request handling and remove the delete delay hack.
-3. Add tag filtering.
-4. Expand tests around backend behavior and scheduling.
-5. Tighten the contract story by syncing OpenAPI, Zod, and tests.
+1. Add tag filtering.
+2. Expand tests around backend behavior and scheduling.
+3. Tighten the contract story by syncing OpenAPI, Zod, and tests.
+4. Tighten CORS.
+5. Extract shared date/frequency helpers if scheduler logic keeps growing.
 
 ## Short version
 
 If only a few things get done soon, the best ones are:
 
-- remove side effects from `GET /tasks`,
-- and fix the frontend request helpers so they behave consistently.
+- add tests around scheduling and validation,
+- and ship a first tag filtering pass.

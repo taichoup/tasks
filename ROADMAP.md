@@ -17,12 +17,13 @@
     - frontend can point to dev via `VITE_API_URL`
     - lambda packaging was updated so runtime dependencies like `zod` can ship with the deployed artifact
     - task state semantics were clarified: `checkedAt` now means "currently checked since", and the old `checked` / `lastChecked` model is being phased out
+    - the main routing lambda is now read-only again for `GET /tasks`; scheduled unchecking stays in `TaskAutoUncheck`
 
 
-- update Oct 8: the email is working now (I think) when a task gets unchecked (although there is still this annoying behavior that the unchecking only happens at best exactly at the same hour as the check. (can be later if I don' go see the site since this happens only when there is a GET request))
-    - I need some sort of scheduler to send the email on weekends
-    - I need the unchecking to happen in real time, maybe a cron that double checks every day if any tasks need unchecking
+- update Oct 8: the original uncheck/email flow worked, but was tied to `GET /tasks`
+    - this is now cleaned up in favor of the scheduled lambda path
+    - remaining work is about scheduler robustness and shared logic, not routing-side unchecking anymore
 
 
 - update Oct 9: j'ai créé une nouvelle lambda pour le unchecking, qui est invoquée par
-un EventBridge Scheduler 1x par jour. Normalement ça envoie un mail à chaque fois, on verra si je reçois des mails. Si ça fonctionne, on peut je pense enlever toute la logique d'unchecking du routeur, et nettoyer un peu tout ça. Ca serait bien aussi de mutualiser le code commun s'il y en (entre les deux lambda)
+un EventBridge Scheduler 1x par jour. La logique d'unchecking a maintenant été retirée du routeur ; il reste surtout a mieux documenter / tester le scheduler et a mutualiser le code commun s'il y en a (entre les lambdas)

@@ -6,9 +6,8 @@ import {
     UpdateItemCommand
 } from "@aws-sdk/client-dynamodb";
 import { DeleteCommand } from "@aws-sdk/lib-dynamodb";
-import { SESClient, SendEmailCommand } from "@aws-sdk/client-ses";
 import { randomUUID } from "crypto";
-import { AWS_REGION, TASKS_TABLE_NAME, EMAIL_FROM, EMAIL_TO } from "./config.mjs";
+import { AWS_REGION, TASKS_TABLE_NAME } from "./config.mjs";
 import { parseJsonBody, validationErrorResponse } from "./http.mjs";
 import { deleteTaskSchema, newTaskSchema, updateTaskSchema } from "./schemas.mjs";
 /**
@@ -16,7 +15,6 @@ import { deleteTaskSchema, newTaskSchema, updateTaskSchema } from "./schemas.mjs
  */
 
 const DBClient = new DynamoDBClient({ region: AWS_REGION });
-const mailClient = new SESClient({ region: AWS_REGION });
 
 async function deleteTask(taskId) {
     try {
@@ -42,46 +40,14 @@ async function deleteTask(taskId) {
     }
 }
 
-async function sendEmail(to, subject, body) {
-    const params = {
-        Destination: {
-            ToAddresses: [to],
-        },
-        Message: {
-            Body: {
-                Text: {
-                    Data: body,
-                },
-            },
-            Subject: {
-                Data: subject,
-            },
-        },
-        Source: EMAIL_FROM,
-    };
-
-    try {
-        const data = await mailClient.send(new SendEmailCommand(params));
-        console.log("Email sent successfully:", data);
-        return data;
-    } catch (err) {
-        console.error("Error sending email:", err);
-        throw err;
-    }
-};
-
 export const handler = async (event) => {
     const method = event.requestContext?.http?.method || event.httpMethod;
 
     if (method === "GET") {
         const data = await DBClient.send(new ScanCommand({ TableName: TASKS_TABLE_NAME }));
-        const now = new Date();
-
-        // TEST
-        // sendEmail('dallemanuel@gmail.com', 'Task unchecked', `Task unchecked: blablabla`);
 
         // Convert raw DynamoDB items to Task[]
-        let tasks = data.Items?.map((item) => ({
+        const tasks = data.Items?.map((item) => ({
             id: item.id.S,
             title: item.title.S,
             checkedAt: item.checkedAt?.S || "",
@@ -91,55 +57,6 @@ export const handler = async (event) => {
             },
             tags: item.tags?.L?.map((tag) => tag.S) || [],
         })) || [];
-
-        // Auto-uncheck logic
-        const tasksToUpdate = [];
-        const DAYS_IN_WEEK = 7;
-        const DAYS_IN_MONTH = 30;
-        const DAYS_IN_YEAR = 365;
-        const unitToDaysMap = {
-            day: 1,
-            week: DAYS_IN_WEEK,
-            month: DAYS_IN_MONTH,
-            year: DAYS_IN_YEAR,
-        };
-        tasks = tasks.map((task) => {
-            if (task.checkedAt) {
-                const last = new Date(task.checkedAt);
-
-                // TODO: switcher vers une logique où on calcule la date d'échéance, mais on tronque à minuit et 1s
-                const diffDaysEffective = (now.getTime() - last.getTime()) / (1000 * 60 * 60 * 24);
-                const diffDaysAllowed = task.frequency.value * unitToDaysMap[task.frequency.unit];
-
-                // const shouldUncheck = diffDaysEffective >= diffDaysAllowed;
-                // THis isn't working... Well it is but it doesn't reset at midnight, it resets at the same time of day that it was checked initially
-                // one solution would be to compare dates instead of comparing durations. (but then would we need to worry about the TZ, I wonder?)
-                // or maybe have the front-end "pretend" that everything is checked at 00:01 am - meh.
-                const shouldUncheck = Math.floor(diffDaysEffective) >= diffDaysAllowed; 
-
-                if (shouldUncheck) {
-                    console.log('Unchecking task %s', task.title);
-                    task.checkedAt = "";
-                    tasksToUpdate.push(task);
-                    sendEmail(EMAIL_TO, 'Task unchecked', `Task unchecked: ${task.title}`);
-                }
-            }
-            return task;
-        });
-
-        // Persist unchecked tasks
-        for (const task of tasksToUpdate) {
-            await DBClient.send(
-                new UpdateItemCommand({
-                    TableName: TASKS_TABLE_NAME,
-                    Key: { id: { S: task.id } },
-                    UpdateExpression: "SET checkedAt = :checkedAt",
-                    ExpressionAttributeValues: {
-                        ":checkedAt": { S: "" }
-                    }
-                })
-            );
-        }
 
         return {
             statusCode: 200,

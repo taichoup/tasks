@@ -34,6 +34,14 @@ The backend now uses `checkedAt` as the meaningful current-state field:
 - `checkedAt` empty -> task is currently due
 - scheduled unchecking clears `checkedAt`
 
+## Lambda responsibilities
+
+- `TasksHandler` / `TasksHandlerDev`: HTTP CRUD only
+- `TaskAutoUncheck`: scheduled scan of the table, recurring expiry, and uncheck emails
+- `TaskDigest`: scheduled weekly digest email
+
+`GET /tasks` is now intended to stay read-only. If unchecking or task emails behave oddly, the first place to inspect is the scheduler path and `TaskAutoUncheck`, not the routing lambda.
+
 ## Deploying
 
 When modifying Lambda code:
