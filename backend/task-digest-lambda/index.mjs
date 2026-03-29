@@ -82,10 +82,15 @@ function comparePriority(a, b) {
 }
 
 function formatTaskLine(task) {
-    const tagsSuffix = task.tags.length > 0 ? ` [${task.tags.join(", ")}]` : "";
-    const cadence = `tous les ${task.frequency.value} ${task.frequency.unit}${task.frequency.value > 1 ? "s" : ""}`;
-    // return `- ${task.title} (${task.urgencyLabel}, ${cadence})${tagsSuffix}`;
-    return `- ${task.title}, ${cadence})`;
+    const duration = {
+        years: task.frequency.unit === "year" ? task.frequency.value : 0,
+        months: task.frequency.unit === "month" ? task.frequency.value : 0,
+        weeks: task.frequency.unit === "week" ? task.frequency.value : 0,
+        days: task.frequency.unit === "day" ? task.frequency.value : 0,
+    };
+    const cadence = new Intl.DurationFormat("fr-FR", { style: "narrow", units: task.frequency.unit }).format(duration);
+    const formattedCadence = `tous les ${cadence}.`;
+    return `- ${task.title}, ${formattedCadence}`;
 }
 
 function buildEmailBody(tasks, now) {
@@ -99,18 +104,18 @@ function buildEmailBody(tasks, now) {
             day: "numeric",
         }).format(now)}`,
         "",
-        `${dueTasks.length} tâche(s) à faire maintenant.`,
+        `${dueTasks.length} tâche(s) disponible(s) :`,
     ];
 
     if (dueTasks.length > 0) {
         lines.push("");
-        lines.push("Priorités de la semaine :");
+        lines.push("Non commencées :");
         lines.push(...dueTasks.map(formatTaskLine));
     }
 
     if (upcomingTasks.length > 0) {
         lines.push("");
-        lines.push("A surveiller ensuite :");
+        lines.push("À refaire bientôt :");
         lines.push(...upcomingTasks.map(formatTaskLine));
     }
 
