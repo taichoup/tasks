@@ -88,8 +88,8 @@ function formatTaskLine(task) {
         weeks: task.frequency.unit === "week" ? task.frequency.value : 0,
         days: task.frequency.unit === "day" ? task.frequency.value : 0,
     };
-    const cadence = new Intl.DurationFormat("fr-FR", { style: "narrow", units: task.frequency.unit }).format(duration);
-    const formattedCadence = `tous les ${cadence}.`;
+    const cadence = new Intl.DurationFormat("fr-FR", { style: "long", units: task.frequency.unit }).format(duration);
+    const formattedCadence = `tous les ${cadence}`;
     return `- ${task.title}, ${formattedCadence}`;
 }
 
