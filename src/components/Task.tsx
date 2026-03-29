@@ -28,9 +28,6 @@ export const Task = ({ task }: TaskProps) => {
         mutationFn: () => deleteTask(task.id),
         onSuccess: async () => {
             console.log("DEBUG: Task deleted successfully");
-            // TODO: fix. Without this hack, the sever replies with stale data somehow
-            // Wait briefly before refetching
-            await new Promise(res => setTimeout(res, 300));
             queryClient.invalidateQueries({ queryKey: ['tasks'] });
         },
         onError: (error) => {

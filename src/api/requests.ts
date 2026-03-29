@@ -12,8 +12,7 @@ const API_URL = import.meta.env.VITE_API_URL || DEFAULT_API_URL;
 export async function fetchTasks() {
     const res = await fetch(API_URL, { method: "GET" });
     if (!res.ok) {
-        console.error("Failed to fetch tasks", res.statusText);
-        return;
+        throw new Error(`Failed to fetch tasks. ${res.statusText}`);
     }
     const data: Task[] = await res.json();
     return data;
@@ -58,23 +57,20 @@ export async function toggleTask(task: Task) {
         }),
     });
     if (!res.ok) {
-        console.error("Failed to update task", res.statusText);
-        return;
+        throw new Error(`Failed to update task. ${res.statusText}`);
     }
-    await fetchTasks();
 }
 
 export async function deleteTask(id: string) {
     const deleteUrl = `${API_URL}/${id}`;
-    try {
-        fetch(deleteUrl, {
-            method: "DELETE",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                id,
-            }),
-        });
-    } catch (serverError) {
-        console.error("Could not delete the task");
+    const res = await fetch(deleteUrl, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            id,
+        }),
+    });
+    if (!res.ok) {
+        throw new Error(`Failed to delete task. ${res.statusText}`);
     }
 }
