@@ -1,3 +1,25 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.filterRow {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.filterLabel {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-weight: 600;
+}
+
+.filterSelect {
+  min-width: 10rem;
+}
+
 .wrapper {
   display: flex;
   flex-direction: row;
