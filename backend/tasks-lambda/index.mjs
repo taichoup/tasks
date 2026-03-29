@@ -8,14 +8,12 @@ import {
 import { DeleteCommand } from "@aws-sdk/lib-dynamodb";
 import { SESClient, SendEmailCommand } from "@aws-sdk/client-ses";
 import { randomUUID } from "crypto";
+import { AWS_REGION, TASKS_TABLE_NAME, EMAIL_FROM, EMAIL_TO } from "./config.mjs";
+import { parseJsonBody, validationErrorResponse } from "./http.mjs";
+import { deleteTaskSchema, newTaskSchema, updateTaskSchema } from "./schemas.mjs";
 /**
  * @typedef {import("../shared/types").Task} Task
  */
-
-const AWS_REGION = process.env.AWS_REGION || "eu-north-1";
-const TASKS_TABLE_NAME = process.env.TASKS_TABLE_NAME || "tasks";
-const EMAIL_FROM = process.env.EMAIL_FROM || "tasks@moulindelingoult.fr";
-const EMAIL_TO = process.env.EMAIL_TO || "dallemanuel@gmail.com";
 
 const DBClient = new DynamoDBClient({ region: AWS_REGION });
 const mailClient = new SESClient({ region: AWS_REGION });
@@ -157,7 +155,11 @@ export const handler = async (event) => {
     }
 
     if (method === "POST") {
-        const body = JSON.parse(event.body);
+        const parsedBody = parseJsonBody(event);
+        if (!parsedBody.success) return parsedBody.response;
+        const validatedBody = newTaskSchema.safeParse(parsedBody.data);
+        if (!validatedBody.success) return validationErrorResponse(validatedBody.error);
+        const body = validatedBody.data;
         console.log("DEBUG: body", body);
         await DBClient.send(
             new PutItemCommand({
@@ -182,12 +184,16 @@ export const handler = async (event) => {
             body: JSON.stringify({ message: "Task added" }),
             headers: {
                 "Access-Control-Allow-Origin": "*"
-            }
+            },
         };
     }
 
     if (method === "PUT") {
-        const body = JSON.parse(event.body);
+        const parsedBody = parseJsonBody(event);
+        if (!parsedBody.success) return parsedBody.response;
+        const validatedBody = updateTaskSchema.safeParse(parsedBody.data);
+        if (!validatedBody.success) return validationErrorResponse(validatedBody.error);
+        const body = validatedBody.data;
         await DBClient.send(
             new UpdateItemCommand({
                 TableName: TASKS_TABLE_NAME,
@@ -204,12 +210,16 @@ export const handler = async (event) => {
             body: JSON.stringify({ message: "Task updated" }),
             headers: {
                 "Access-Control-Allow-Origin": "*",
-            }
+            },
         };
     }
 
     if (method === "DELETE") {
-        const body = JSON.parse(event.body);
+        const parsedBody = parseJsonBody(event);
+        if (!parsedBody.success) return parsedBody.response;
+        const validatedBody = deleteTaskSchema.safeParse(parsedBody.data);
+        if (!validatedBody.success) return validationErrorResponse(validatedBody.error);
+        const body = validatedBody.data;
         console.log("DEBUG: body", body);
         await deleteTask(body.id);
         return {

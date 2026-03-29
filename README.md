@@ -14,6 +14,31 @@ npm run push:lambda:uncheck # build and deploy the auto-uncheck lambda
 npm run push:lambda:digest # build and deploy the weekly digest lambda
 ```
 
+## Backend structure
+
+The repo now contains three backend Lambdas:
+
+- `backend/tasks-lambda/`: main HTTP routing lambda (`TasksHandler` / `TasksHandlerDev`)
+- `backend/task-auto-uncheck-lambda/`: scheduled auto-uncheck lambda (`TaskAutoUncheck`)
+- `backend/task-digest-lambda/`: scheduled weekly digest lambda (`TaskDigest`)
+
+The main routing lambda has been split into smaller files:
+
+- `index.mjs`: main handler and DynamoDB/SES flow
+- `schemas.mjs`: Zod request schemas
+- `http.mjs`: JSON parsing and validation error helpers
+- `config.mjs`: env-based config
+
+## Lambda packaging
+
+Lambda packaging is no longer just a single-file zip.
+
+- `build:lambda` now packages the whole `backend/tasks-lambda/` directory
+- runtime dependencies needed by the Lambda, such as `zod`, are included in the zip
+- the uncheck and digest Lambdas are also packaged by zipping their whole directory contents
+
+This matters because runtime validation now happens inside the Lambda, so `zod` must be present in the deployed artifact.
+
 ## Some useful documentation
 
 See [AWS.md](./AWS.md) for info about the AWS config  

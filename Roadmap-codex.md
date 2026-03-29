@@ -25,14 +25,23 @@ What may still be worth improving later:
 
 The repo already has an OpenAPI spec in [backend/openapi.yaml](/Users/manu/Documents/repos/tasks/backend/openapi.yaml), and generated frontend types in [shared/generated-types.ts](/Users/manu/Documents/repos/tasks/shared/generated-types.ts), which is a good start.
 
-The gap is that the lambda still trusts request bodies too much:
+Progress so far:
 
-- `POST` assumes `body.tags.map(...)` exists.
-- `PUT` and `DELETE` also parse JSON and immediately use the result without validation.
+- first-pass runtime validation is now in place in [backend/tasks-lambda/index.mjs](/Users/manu/Documents/repos/tasks/backend/tasks-lambda/index.mjs)
+- the main routing lambda has been split so Zod schemas and request helpers live in:
+  - [backend/tasks-lambda/schemas.mjs](/Users/manu/Documents/repos/tasks/backend/tasks-lambda/schemas.mjs)
+  - [backend/tasks-lambda/http.mjs](/Users/manu/Documents/repos/tasks/backend/tasks-lambda/http.mjs)
+- Lambda packaging was updated so `zod` is included in the deployment artifact
+
+What is still incomplete:
+
+- the OpenAPI spec is not yet guaranteed to match the runtime validation exactly
+- there are not yet tests covering invalid payloads / `400` responses
+- the other Lambdas do not yet share the same schema or helper layer
 
 Recommended improvements:
 
-- Add runtime validation in the lambda.
+- Keep runtime validation in the lambda.
 - Prefer Zod for request parsing and error messages.
 - Either:
   - make Zod the source of truth and derive TypeScript types from it, or
@@ -227,18 +236,17 @@ Why this matters:
 
 ## Suggested implementation order
 
-1. Runtime validation in the lambda.
-2. Fix the `checked` / `lastChecked` data model.
-3. Make `GET /tasks` read-only and move unchecking fully to the scheduler.
-4. Fix frontend async request handling and remove the delete delay hack.
-5. Add tag filtering.
-6. Expand tests around backend behavior and scheduling.
+1. Fix the `checked` / `lastChecked` data model.
+2. Make `GET /tasks` read-only and move unchecking fully to the scheduler.
+3. Fix frontend async request handling and remove the delete delay hack.
+4. Add tag filtering.
+5. Expand tests around backend behavior and scheduling.
+6. Tighten the contract story by syncing OpenAPI, Zod, and tests.
 
 ## Short version
 
 If only a few things get done soon, the best ones are:
 
-- validate request bodies at runtime,
 - fix the `checked` / `lastChecked` semantics,
 - remove side effects from `GET /tasks`,
 - and fix the frontend request helpers so they behave consistently.
