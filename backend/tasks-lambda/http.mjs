@@ -38,3 +38,22 @@ export function parseJsonBody(event) {
         };
     }
 }
+
+export function badRequestResponse(message, fieldErrors = {}) {
+    return {
+        statusCode: 400,
+        body: JSON.stringify({
+            message,
+            errors: {
+                formErrors: [],
+                fieldErrors,
+            },
+        }),
+        headers: {
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "GET,POST,PUT,DELETE,OPTIONS",
+            "Access-Control-Allow-Headers": "Content-Type",
+        },
+    };
+}
+

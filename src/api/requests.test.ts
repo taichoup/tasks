@@ -99,8 +99,6 @@ describe("requests API helpers", () => {
         await expect(deleteTask("task-1")).rejects.toThrow("Failed to delete task. Server Error");
         expect(fetch).toHaveBeenCalledWith(expect.stringMatching(/\/tasks\/task-1$/), expect.objectContaining({
             method: "DELETE",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ id: "task-1" }),
         }));
     });
 });

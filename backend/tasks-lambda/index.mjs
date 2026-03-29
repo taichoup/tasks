@@ -8,8 +8,9 @@ import {
 import { DeleteCommand } from "@aws-sdk/lib-dynamodb";
 import { randomUUID } from "crypto";
 import { AWS_REGION, TASKS_TABLE_NAME } from "./config.mjs";
-import { parseJsonBody, validationErrorResponse } from "./http.mjs";
-import { deleteTaskSchema, newTaskSchema, updateTaskSchema } from "./schemas.mjs";
+import { badRequestResponse, parseJsonBody, validationErrorResponse } from "./http.mjs";
+import { newTaskSchema, updateTaskSchema } from "./schemas.mjs";
+
 /**
  * @typedef {import("../shared/types").Task} Task
  */
@@ -129,13 +130,16 @@ export const handler = async (event) => {
     }
 
     if (method === "DELETE") {
-        const parsedBody = parseJsonBody(event);
-        if (!parsedBody.success) return parsedBody.response;
-        const validatedBody = deleteTaskSchema.safeParse(parsedBody.data);
-        if (!validatedBody.success) return validationErrorResponse(validatedBody.error);
-        const body = validatedBody.data;
-        console.log("DEBUG: body", body);
-        await deleteTask(body.id);
+        const id = event.pathParameters?.id?.trim();
+
+        if (!id) {
+            return badRequestResponse("Invalid request path", {
+                id: ["Path parameter 'id' is required"],
+            });
+        }
+
+        await deleteTask(id);
+
         return {
             statusCode: 204,
             body: JSON.stringify({ message: "Task deleted" }),
@@ -145,7 +149,8 @@ export const handler = async (event) => {
                 "Access-Control-Allow-Methods": "GET,POST,PUT,DELETE,OPTIONS"
             }
         };
-    };
+    }
+
 
     if (method === "OPTIONS") {
         return {

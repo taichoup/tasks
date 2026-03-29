@@ -103,19 +103,36 @@ describe("tasks lambda handler", () => {
         expect(sendMock).not.toHaveBeenCalled();
     });
 
-    it("returns 400 for invalid DELETE payloads", async () => {
+    it("returns 400 for missing path param on DELETE requests", async () => {
         const response = await handler({
             httpMethod: "DELETE",
-            body: JSON.stringify({
-                id: "",
-            }),
         });
 
         expect(response.statusCode).toBe(400);
         expect(JSON.parse(response.body)).toMatchObject({
-            message: "Invalid request body",
+            message: "Invalid request path",
+            errors: {
+                fieldErrors: {
+                    id: ["Path parameter 'id' is required"],
+                },
+            },
         });
         expect(sendMock).not.toHaveBeenCalled();
+    });
+
+    it("deletes the task identified by the path parameter", async () => {
+        sendMock.mockResolvedValue({});
+
+        const response = await handler({
+            httpMethod: "DELETE",
+            pathParameters: {
+                id: "task-1",
+            },
+        });
+
+        expect(response.statusCode).toBe(204);
+        expect(JSON.parse(response.body)).toEqual({ message: "Task deleted" });
+        expect(sendMock).toHaveBeenCalledTimes(1);
     });
 
     it("maps GET results into API tasks", async () => {

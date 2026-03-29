@@ -110,18 +110,23 @@ components:
   schemas:
     UpdateTask:
       type: object
-      required: [id, checkedAt]
+      required: [id]
       properties:
         id:
           type: string
         checkedAt:
-          type: string
+          oneOf:
+            - type: string
+              format: date-time
+            - type: string
+              enum: [""]
     NewTask:
       type: object
       required: [title, frequency]
       properties:
         title:
           type: string
+          minlength: 1
         frequency:
           type: object
           required: [unit, value]

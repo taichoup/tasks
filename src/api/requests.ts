@@ -65,12 +65,10 @@ export async function deleteTask(id: string) {
     const deleteUrl = `${API_URL}/${id}`;
     const res = await fetch(deleteUrl, {
         method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-            id,
-        }),
     });
+
     if (!res.ok) {
         throw new Error(`Failed to delete task. ${res.statusText}`);
     }
 }
+

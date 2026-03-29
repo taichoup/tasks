@@ -17,6 +17,3 @@ export const updateTaskSchema = z.object({
     checkedAt: z.union([z.iso.datetime(), z.literal("")]).optional(),
 });
 
-export const deleteTaskSchema = z.object({
-    id: z.string().trim().min(1),
-});

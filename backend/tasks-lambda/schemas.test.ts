@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { deleteTaskSchema, newTaskSchema, updateTaskSchema } from "./schemas.mjs";
+import { newTaskSchema, updateTaskSchema } from "./schemas.mjs";
 
 describe("newTaskSchema", () => {
     it("defaults tags to an empty array", () => {
@@ -67,12 +67,5 @@ describe("updateTaskSchema", () => {
         });
 
         expect(result.success).toBe(false);
-    });
-});
-
-describe("deleteTaskSchema", () => {
-    it("requires a non-empty id", () => {
-        expect(deleteTaskSchema.safeParse({ id: "" }).success).toBe(false);
-        expect(deleteTaskSchema.safeParse({ id: "task-1" }).success).toBe(true);
     });
 });

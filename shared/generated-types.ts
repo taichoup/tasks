@@ -171,7 +171,7 @@ export interface components {
     schemas: {
         UpdateTask: {
             id: string;
-            checkedAt: string;
+            checkedAt?: string | "";
         };
         NewTask: {
             title: string;
