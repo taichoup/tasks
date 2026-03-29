@@ -11,14 +11,17 @@ Completed recently:
 - the main routing lambda is read-only again for `GET /tasks`
 - task state semantics were simplified around `checkedAt`
 - frontend request helpers were cleaned up
+- a first client-side tag filter is now in place
+- backend and frontend test coverage was expanded around requests and handler behavior
+- the `DELETE /tasks/{id}` contract now matches the route shape better
 
 Best next candidates:
 
-1. Add tag filtering.
-2. Expand tests around backend behavior and scheduling.
-3. Tighten the contract story by syncing OpenAPI, Zod, and tests.
-4. Tighten CORS.
-5. Extract shared date/frequency helpers if scheduler logic keeps growing.
+1. Extract shared date/frequency helpers across lambdas and frontend.
+2. Tighten CORS.
+3. Keep tightening the contract story where OpenAPI and runtime still drift.
+4. Expand scheduler-focused tests.
+5. Decide whether any remaining live/dev AWS naming should be cleaned up.
 
 ## Historical notes
 
@@ -74,12 +77,14 @@ Progress so far:
   - [backend/tasks-lambda/schemas.mjs](/Users/manu/Documents/repos/tasks/backend/tasks-lambda/schemas.mjs)
   - [backend/tasks-lambda/http.mjs](/Users/manu/Documents/repos/tasks/backend/tasks-lambda/http.mjs)
 - Lambda packaging was updated so `zod` is included in the deployment artifact
+- `DELETE /tasks/{id}` now uses the path parameter instead of a request body
+- OpenAPI and generated frontend types have been updated for the newer `checkedAt` model
 
 What is still incomplete:
 
-- the OpenAPI spec is not yet guaranteed to match the runtime validation exactly
-- there are not yet tests covering invalid payloads / `400` responses
+- the OpenAPI spec is not yet guaranteed to match the runtime validation exactly in every detail
 - the other Lambdas do not yet share the same schema or helper layer
+- there are no contract-level tests asserting that OpenAPI and runtime validation stay in sync automatically
 
 Recommended improvements:
 
@@ -137,6 +142,8 @@ Why this matters:
 
 ## 5. Centralize date and frequency logic
 
+This is now the next main cleanup.
+
 The repo already introduced time constants in [src/utils/constants.ts](/Users/manu/Documents/repos/tasks/src/utils/constants.ts), which is a good direction.
 
 There is still duplicated business logic between frontend and backend:
@@ -149,6 +156,11 @@ Recommended improvements:
 
 - move task scheduling/date logic into shared utilities
 - reuse the same logic for sorting, countdown display, and scheduler unchecking
+- mutualize task mapping / recurrence helpers across:
+  - [backend/tasks-lambda/index.mjs](/Users/manu/Documents/repos/tasks/backend/tasks-lambda/index.mjs)
+  - [backend/task-auto-uncheck-lambda/index.mjs](/Users/manu/Documents/repos/tasks/backend/task-auto-uncheck-lambda/index.mjs)
+  - [backend/task-digest-lambda/index.mjs](/Users/manu/Documents/repos/tasks/backend/task-digest-lambda/index.mjs)
+  - [src/components/Task.tsx](/Users/manu/Documents/repos/tasks/src/components/Task.tsx)
 - decide explicitly how month/year frequencies should behave: fixed durations or calendar-aware dates
 - decide explicitly which timezone defines "the day changes"
 
@@ -199,7 +211,7 @@ Why this matters:
 
 ## 8. Add tag filtering
 
-This looks like a very reachable feature.
+Completed in a first client-side version.
 
 The data model already supports tags:
 
@@ -207,11 +219,16 @@ The data model already supports tags:
 - tags are stored in DynamoDB
 - tags are displayed in the task UI
 
-Recommended improvements:
+What is now in place:
 
-- start with client-side filtering in the React app
-- add a simple filter control above the task lists
-- decide whether the filter should show one tag at a time, support multiple tags, or include an "untagged" view
+- a simple client-side filter control above the task lists
+- one selected tag at a time
+- `Tous` and `Sans tag` views
+
+What may still be worth improving later:
+
+- decide whether multi-tag filtering is worth it
+- improve the display labels/copy for tags if needed
 - only add server-side filtering later if the dataset grows enough to justify it
 
 Why this matters:
@@ -222,14 +239,20 @@ Why this matters:
 
 ## 9. Improve tests where risk is highest
 
-The current tests pass, but they only cover sorting logic in [src/utils/taskSorting.test.ts](/Users/manu/Documents/repos/tasks/src/utils/taskSorting.test.ts).
+Progress so far:
+
+- sorting logic is covered in [src/utils/taskSorting.test.ts](/Users/manu/Documents/repos/tasks/src/utils/taskSorting.test.ts)
+- request helper behavior is covered in [src/api/requests.test.ts](/Users/manu/Documents/repos/tasks/src/api/requests.test.ts)
+- request parsing / schema behavior is covered in:
+  - [backend/tasks-lambda/http.test.ts](/Users/manu/Documents/repos/tasks/backend/tasks-lambda/http.test.ts)
+  - [backend/tasks-lambda/schemas.test.ts](/Users/manu/Documents/repos/tasks/backend/tasks-lambda/schemas.test.ts)
+  - [backend/tasks-lambda/index.test.ts](/Users/manu/Documents/repos/tasks/backend/tasks-lambda/index.test.ts)
 
 Recommended next tests:
 
-- Lambda request validation tests for `POST`, `PUT`, and `DELETE`
 - tests for uncheck date calculation
 - tests for scheduler behavior and email triggering
-- a few frontend tests for add/toggle/delete flows
+- a few component-level frontend tests around filtering and task rendering
 
 Why this matters:
 
@@ -240,5 +263,5 @@ Why this matters:
 
 If only a few things get done soon, the best ones are:
 
-- add tests around scheduling and validation
-- ship a first tag filtering pass
+- extract the shared scheduling/date logic
+- add scheduler-focused tests

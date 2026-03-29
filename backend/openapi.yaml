@@ -126,7 +126,7 @@ components:
       properties:
         title:
           type: string
-          minlength: 1
+          minLength: 1
         frequency:
           type: object
           required: [unit, value]
