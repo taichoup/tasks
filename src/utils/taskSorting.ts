@@ -39,5 +39,5 @@ import type { Task } from "../types/derived";
   
   // assume a and b are both checked
   export const CheckedTasksSortFunction = (a: Task, b: Task) => {
-    return new Date(b.lastChecked!).getTime() - new Date(a.lastChecked!).getTime();
+    return new Date(b.checkedAt!).getTime() - new Date(a.checkedAt!).getTime();
   };

@@ -49,8 +49,7 @@ export const handler = async () => {
     let tasks = data.Items?.map((item) => ({
         id: item.id.S,
         title: item.title.S,
-        checked: item.checked.BOOL,
-        lastChecked: item.lastChecked?.S,
+        checkedAt: item.checkedAt?.S || item.lastChecked?.S || "",
         frequency: {
             value: parseInt(item.frequency.M.value.N, 10),
             unit: item.frequency.M.unit.S
@@ -72,8 +71,8 @@ export const handler = async () => {
     };
 
     tasks = tasks.map((task) => {
-        if (task.checked && task.lastChecked) {
-            const last = new Date(task.lastChecked);
+        if (task.checkedAt) {
+            const last = new Date(task.checkedAt);
             const diffDaysEffective = (now.getTime() - last.getTime()) / (1000 * 60 * 60 * 24);
             const diffDaysAllowed = task.frequency.value * unitToDaysMap[task.frequency.unit];
             const shouldUncheck = Math.floor(diffDaysEffective) >= diffDaysAllowed;
@@ -88,7 +87,7 @@ export const handler = async () => {
 
             if (shouldUncheck) {
                 console.log("DEBUG: Unchecking task %s", task.title);
-                task.checked = false;
+                task.checkedAt = "";
                 tasksToUpdate.push(task);
                 sendEmail(EMAIL_TO, "Task unchecked", `Task unchecked: ${task.title}`);
             }
@@ -103,10 +102,9 @@ export const handler = async () => {
             new UpdateItemCommand({
                 TableName: TASKS_TABLE_NAME,
                 Key: { id: { S: task.id } },
-                UpdateExpression: "SET checked = :checked, lastChecked = :lastChecked",
+                UpdateExpression: "SET checkedAt = :checkedAt REMOVE checked, lastChecked",
                 ExpressionAttributeValues: {
-                    ":checked": { BOOL: false },
-                    ":lastChecked": { S: "" }
+                    ":checkedAt": { S: "" }
                 }
             })
         );

@@ -13,8 +13,7 @@ const BASE_TASK: Task = {
   id: "1",
   title: "Test",
   frequency: { unit: "day", value: 1 },
-  lastChecked: undefined,
-  checked: false,
+  checkedAt: "",
   tags: [] as TagList,
 };
 
@@ -79,9 +78,9 @@ describe("isSameValue", () => {
 
 describe("unCheckedTasksSortFunction", () => {
   it("sorts unchecked tasks by ascending frequency (converted to days)", () => {
-    const t1 = { ...BASE_TASK, frequency: { unit: "week", value: 1 }, lastChecked: undefined } as Task;
-    const t2 = { ...BASE_TASK, frequency: { unit: "day", value: 3 }, lastChecked: undefined } as Task;
-    const t3 = { ...BASE_TASK, frequency: { unit: "month", value: 1 }, lastChecked: undefined } as Task;
+    const t1 = { ...BASE_TASK, frequency: { unit: "week", value: 1 }, checkedAt: "" } as Task;
+    const t2 = { ...BASE_TASK, frequency: { unit: "day", value: 3 }, checkedAt: "" } as Task;
+    const t3 = { ...BASE_TASK, frequency: { unit: "month", value: 1 }, checkedAt: "" } as Task;
     const arr = [t1, t2, t3];
     const sorted = [...arr].sort(unCheckedTasksSortFunction);
     expect(sorted[0]).toBe(t2); // day (3 days)
@@ -90,28 +89,28 @@ describe("unCheckedTasksSortFunction", () => {
   });
 
   it("returns 0 for tasks with same frequency", () => {
-    const t1 = { ...BASE_TASK, frequency: { unit: "day", value: 1 }, lastChecked: undefined } as Task;
-    const t2 = { ...BASE_TASK, frequency: { unit: "day", value: 1 }, lastChecked: undefined } as Task;
+    const t1 = { ...BASE_TASK, frequency: { unit: "day", value: 1 }, checkedAt: "" } as Task;
+    const t2 = { ...BASE_TASK, frequency: { unit: "day", value: 1 }, checkedAt: "" } as Task;
     expect(unCheckedTasksSortFunction(t1, t2)).toBe(0);
   });
 });
 
 describe("CheckedTasksSortFunction", () => {
-  it("sorts checked tasks by descending lastChecked date", () => {
+  it("sorts checked tasks by descending checkedAt date", () => {
     const now = Date.now();
-    const t1 = { ...BASE_TASK, lastChecked: new Date(now - 1000 * 60 * 60 * 24).toISOString() }; // 1 day ago
-    const t2 = { ...BASE_TASK, lastChecked: new Date(now - 1000 * 60 * 60 * 48).toISOString() }; // 2 days ago
-    const t3 = { ...BASE_TASK, lastChecked: new Date(now).toISOString() }; // now
+    const t1 = { ...BASE_TASK, checkedAt: new Date(now - 1000 * 60 * 60 * 24).toISOString() }; // 1 day ago
+    const t2 = { ...BASE_TASK, checkedAt: new Date(now - 1000 * 60 * 60 * 48).toISOString() }; // 2 days ago
+    const t3 = { ...BASE_TASK, checkedAt: new Date(now).toISOString() }; // now
     const arr = [t1, t2, t3];
     const sorted = [...arr].sort(CheckedTasksSortFunction);
     expect(sorted[0]).toBe(t3); // most recent
     expect(sorted[2]).toBe(t2); // oldest
   });
 
-  it("returns 0 for tasks with same lastChecked date", () => {
+  it("returns 0 for tasks with same checkedAt date", () => {
     const date = new Date().toISOString();
-    const t1 = { ...BASE_TASK, lastChecked: date };
-    const t2 = { ...BASE_TASK, lastChecked: date };
+    const t1 = { ...BASE_TASK, checkedAt: date };
+    const t2 = { ...BASE_TASK, checkedAt: date };
     expect(CheckedTasksSortFunction(t1, t2)).toBe(0);
   });
 });

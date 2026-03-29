@@ -48,13 +48,13 @@ export async function addTask(
 
 // Toggle task completion
 export async function toggleTask(task: Task) {
+    const checkedAt = task.checkedAt ? "" : new Date().toISOString();
     const res = await fetch(API_URL, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
             id: task.id,
-            checked: !task.checked,
-            lastChecked: !task.checked ? new Date().toISOString() : "",
+            checkedAt,
         }),
     });
     if (!res.ok) {

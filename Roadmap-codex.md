@@ -25,14 +25,23 @@ What may still be worth improving later:
 
 The repo already has an OpenAPI spec in [backend/openapi.yaml](/Users/manu/Documents/repos/tasks/backend/openapi.yaml), and generated frontend types in [shared/generated-types.ts](/Users/manu/Documents/repos/tasks/shared/generated-types.ts), which is a good start.
 
-The gap is that the lambda still trusts request bodies too much:
+Progress so far:
 
-- `POST` assumes `body.tags.map(...)` exists.
-- `PUT` and `DELETE` also parse JSON and immediately use the result without validation.
+- first-pass runtime validation is now in place in [backend/tasks-lambda/index.mjs](/Users/manu/Documents/repos/tasks/backend/tasks-lambda/index.mjs)
+- the main routing lambda has been split so Zod schemas and request helpers live in:
+  - [backend/tasks-lambda/schemas.mjs](/Users/manu/Documents/repos/tasks/backend/tasks-lambda/schemas.mjs)
+  - [backend/tasks-lambda/http.mjs](/Users/manu/Documents/repos/tasks/backend/tasks-lambda/http.mjs)
+- Lambda packaging was updated so `zod` is included in the deployment artifact
+
+What is still incomplete:
+
+- the OpenAPI spec is not yet guaranteed to match the runtime validation exactly
+- there are not yet tests covering invalid payloads / `400` responses
+- the other Lambdas do not yet share the same schema or helper layer
 
 Recommended improvements:
 
-- Add runtime validation in the lambda.
+- Keep runtime validation in the lambda.
 - Prefer Zod for request parsing and error messages.
 - Either:
   - make Zod the source of truth and derive TypeScript types from it, or
@@ -131,41 +140,28 @@ Why this matters:
 - It will fix the “same hour as check time” issue more cleanly.
 - It makes tests much more meaningful.
 
-## 6. Fix the `checked` / `lastChecked` data model
+## 6. Fix the task-state data model
 
-This is now worth calling out explicitly because the current semantics are muddy.
+Completed in the chosen simplified form.
 
-Right now:
+Chosen model:
 
-- `checked` is meant to represent whether the task is currently done
-- `lastChecked` sounds like it should represent the last completion timestamp
+- `checkedAt` means "currently checked since"
+- `checkedAt = ""` means the task is currently due
+- no long-term completion history is preserved after expiry
+- the old `lastChecked` / `checked` fields are legacy compatibility concerns only
 
-But during auto-uncheck, the code resets `lastChecked` back to an empty string:
+What is now in place:
 
-- [backend/tasks-lambda/index.mjs](/Users/manu/Documents/repos/tasks/backend/tasks-lambda/index.mjs)
-- [backend/task-auto-uncheck-lambda/index.mjs](/Users/manu/Documents/repos/tasks/backend/task-auto-uncheck-lambda/index.mjs)
+- frontend grouping uses `checkedAt`
+- API responses use `checkedAt`
+- scheduled unchecking clears `checkedAt`
+- digest logic no longer depends on historical completion semantics
 
-That means `lastChecked` is not really “last completed at”; it behaves more like “currently checked since”, which is much less intuitive and throws away useful history.
+What may still be worth improving later:
 
-Why this is a problem:
-
-- the field name suggests one meaning, but the implementation uses another
-- completion history is lost when recurring tasks become due again
-- some frontend code uses `lastChecked` almost as a proxy for `checked`, which only works because the timestamp gets erased
-
-Recommended improvements:
-
-- decide what `lastChecked` should mean
-- if it truly means “last time this task was completed”, stop clearing it during auto-uncheck
-- let `checked` represent only the current due/done state
-- if needed, add a separate derived notion such as `dueAt` or compute due status from `lastChecked + frequency`
-- update frontend grouping and sorting to rely on `checked` for current state, not `lastChecked`
-
-Why this matters:
-
-- the current model does not make conceptual sense for recurring tasks
-- it makes the UI and backend logic harder to reason about
-- it blocks future features like a useful digest or completion history
+- remove transitional fallback support for `lastChecked` in backend reads/validation once the data is cleaned up
+- backfill or clean legacy DynamoDB fields if desired
 
 ## 7. Tighten CORS
 
@@ -227,18 +223,15 @@ Why this matters:
 
 ## Suggested implementation order
 
-1. Runtime validation in the lambda.
-2. Fix the `checked` / `lastChecked` data model.
-3. Make `GET /tasks` read-only and move unchecking fully to the scheduler.
-4. Fix frontend async request handling and remove the delete delay hack.
-5. Add tag filtering.
-6. Expand tests around backend behavior and scheduling.
+1. Make `GET /tasks` read-only and move unchecking fully to the scheduler.
+2. Fix frontend async request handling and remove the delete delay hack.
+3. Add tag filtering.
+4. Expand tests around backend behavior and scheduling.
+5. Tighten the contract story by syncing OpenAPI, Zod, and tests.
 
 ## Short version
 
 If only a few things get done soon, the best ones are:
 
-- validate request bodies at runtime,
-- fix the `checked` / `lastChecked` semantics,
 - remove side effects from `GET /tasks`,
 - and fix the frontend request helpers so they behave consistently.

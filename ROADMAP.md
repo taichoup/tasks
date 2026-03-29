@@ -1,20 +1,22 @@
-- needs some sort of contract between back and front. I did add an OpenAPI thing but am not sure how it works. We need schema validation on the lambda side, too. Look at Request Validator in API Gateway, for every method's method request section. Maybe that's a good lead.
+- needs some sort of contract between back and front. I did add an OpenAPI thing but am not sure how it works.
+    - first pass of runtime validation is now in place in `TasksHandler` with Zod
+    - still to do:
+        - decide whether Zod or OpenAPI is the real source of truth
+        - align the OpenAPI spec with the runtime validation rules
+        - add tests for invalid payloads and 400 responses
 - needs something more robust for CORS, so as not to have to allow *
 - add a filter based on tags.
 - use Zod for schema validation and typing generation?
-- clarify the meaning of `checked` vs `lastChecked`
-    - currently a task can be auto-unchecked and the code wipes `lastChecked` back to `""`
-    - that means `lastChecked` is not really "the last time the task was completed", which is confusing and loses history
-    - decide on a cleaner model:
-        - either `lastChecked` should truly keep the last completion date even after unchecking
-        - or it should be renamed to reflect that it really means "currently checked since"
-    - update frontend sorting/grouping logic accordingly, because right now some code treats `lastChecked` as if it implied `checked === true`
+    - runtime validation has started in the main routing lambda
+    - typing generation / overall schema strategy is still unresolved
 
 - update Mar 29: dev/live separation is now in place in a first version
     - separate dev lambda: `TasksHandlerDev`
     - separate dev DynamoDB table: `tasks-dev`
     - separate dev API Gateway
     - frontend can point to dev via `VITE_API_URL`
+    - lambda packaging was updated so runtime dependencies like `zod` can ship with the deployed artifact
+    - task state semantics were clarified: `checkedAt` now means "currently checked since", and the old `checked` / `lastChecked` model is being phased out
 
 
 - update Oct 8: the email is working now (I think) when a task gets unchecked (although there is still this annoying behavior that the unchecking only happens at best exactly at the same hour as the check. (can be later if I don' go see the site since this happens only when there is a GET request))

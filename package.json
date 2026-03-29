@@ -10,13 +10,15 @@
     "preview": "vite preview",
     "generate:types": "openapi-typescript ./backend/openapi.yaml --output ./shared/generated-types.ts",
     "test": "vitest",
-    "build:lambda": "mkdir -p dist && cd backend/tasks-lambda && zip ../../dist/tasks-lambda.zip index.mjs",
-    "build:lambda:uncheck": "mkdir -p dist && cd backend/task-auto-uncheck-lambda && zip ../../dist/task-auto-uncheck-lambda.zip index.mjs",
-    "build:lambda:digest": "mkdir -p dist && cd backend/task-digest-lambda && zip ../../dist/task-digest-lambda.zip index.mjs",
-    "deploy:lambda": "aws lambda update-function-code --function-name TasksHandler --zip-file fileb://dist/tasks-lambda.zip --region eu-north-1",
-    "deploy:lambda-dev": "aws lambda update-function-code --function-name TasksHandlerDev --zip-file fileb://dist/tasks-lambda.zip --region eu-north-1",
-    "deploy:lambda:uncheck": "aws lambda update-function-code --function-name TaskAutoUncheck --zip-file fileb://dist/task-auto-uncheck-lambda.zip --region eu-north-1",
-    "deploy:lambda:digest": "aws lambda update-function-code --function-name TaskDigest --zip-file fileb://dist/task-digest-lambda.zip --region eu-north-1",
+    "lambda:package": "./scripts/package-lambda.sh",
+    "lambda:deploy": "./scripts/deploy-lambda.sh",
+    "build:lambda": "npm run lambda:package -- tasks-lambda zod",
+    "build:lambda:uncheck": "npm run lambda:package -- task-auto-uncheck-lambda",
+    "build:lambda:digest": "npm run lambda:package -- task-digest-lambda",
+    "deploy:lambda": "npm run lambda:deploy -- TasksHandler dist/tasks-lambda.zip",
+    "deploy:lambda-dev": "npm run lambda:deploy -- TasksHandlerDev dist/tasks-lambda.zip",
+    "deploy:lambda:uncheck": "npm run lambda:deploy -- TaskAutoUncheck dist/task-auto-uncheck-lambda.zip",
+    "deploy:lambda:digest": "npm run lambda:deploy -- TaskDigest dist/task-digest-lambda.zip",
     "push:lambda": "npm run build:lambda && npm run deploy:lambda",
     "push:lambda-dev": "npm run build:lambda && npm run deploy:lambda-dev",
     "push:lambda:uncheck": "npm run build:lambda:uncheck && npm run deploy:lambda:uncheck",
@@ -25,7 +27,8 @@
   "dependencies": {
     "@tanstack/react-query": "^5.85.3",
     "react": "^19.1.1",
-    "react-dom": "^19.1.1"
+    "react-dom": "^19.1.1",
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@eslint/js": "^9.33.0",

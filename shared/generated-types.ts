@@ -171,9 +171,7 @@ export interface components {
     schemas: {
         UpdateTask: {
             id: string;
-            checked: boolean;
-            /** Format: date-time */
-            lastChecked?: string;
+            checkedAt: string;
         };
         NewTask: {
             title: string;
@@ -189,9 +187,7 @@ export interface components {
         Task: {
             id: string;
             title: string;
-            checked: boolean;
-            /** Format: date-time */
-            lastChecked?: string;
+            checkedAt: string;
             frequency: {
                 /** Format: int32 */
                 value: number;
