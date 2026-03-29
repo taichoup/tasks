@@ -131,7 +131,43 @@ Why this matters:
 - It will fix the “same hour as check time” issue more cleanly.
 - It makes tests much more meaningful.
 
-## 6. Tighten CORS
+## 6. Fix the `checked` / `lastChecked` data model
+
+This is now worth calling out explicitly because the current semantics are muddy.
+
+Right now:
+
+- `checked` is meant to represent whether the task is currently done
+- `lastChecked` sounds like it should represent the last completion timestamp
+
+But during auto-uncheck, the code resets `lastChecked` back to an empty string:
+
+- [backend/tasks-lambda/index.mjs](/Users/manu/Documents/repos/tasks/backend/tasks-lambda/index.mjs)
+- [backend/task-auto-uncheck-lambda/index.mjs](/Users/manu/Documents/repos/tasks/backend/task-auto-uncheck-lambda/index.mjs)
+
+That means `lastChecked` is not really “last completed at”; it behaves more like “currently checked since”, which is much less intuitive and throws away useful history.
+
+Why this is a problem:
+
+- the field name suggests one meaning, but the implementation uses another
+- completion history is lost when recurring tasks become due again
+- some frontend code uses `lastChecked` almost as a proxy for `checked`, which only works because the timestamp gets erased
+
+Recommended improvements:
+
+- decide what `lastChecked` should mean
+- if it truly means “last time this task was completed”, stop clearing it during auto-uncheck
+- let `checked` represent only the current due/done state
+- if needed, add a separate derived notion such as `dueAt` or compute due status from `lastChecked + frequency`
+- update frontend grouping and sorting to rely on `checked` for current state, not `lastChecked`
+
+Why this matters:
+
+- the current model does not make conceptual sense for recurring tasks
+- it makes the UI and backend logic harder to reason about
+- it blocks future features like a useful digest or completion history
+
+## 7. Tighten CORS
 
 The roadmap note about CORS is correct: the lambda still returns `Access-Control-Allow-Origin: *`.
 
@@ -147,7 +183,7 @@ Why this matters:
 - It is safer for production.
 - It reduces confusion when debugging browser/API issues.
 
-## 7. Add tag filtering
+## 8. Add tag filtering
 
 This looks like a very reachable feature.
 
@@ -173,7 +209,7 @@ Why this matters:
 - It is much smaller than the backend architecture tasks.
 - It can be shipped independently.
 
-## 8. Improve tests where risk is highest
+## 9. Improve tests where risk is highest
 
 The current tests pass, but they only cover sorting logic in [src/utils/taskSorting.test.ts](/Users/manu/Documents/repos/tasks/src/utils/taskSorting.test.ts).
 
@@ -192,15 +228,17 @@ Why this matters:
 ## Suggested implementation order
 
 1. Runtime validation in the lambda.
-2. Make `GET /tasks` read-only and move unchecking fully to the scheduler.
-3. Fix frontend async request handling and remove the delete delay hack.
-4. Add tag filtering.
-5. Expand tests around backend behavior and scheduling.
+2. Fix the `checked` / `lastChecked` data model.
+3. Make `GET /tasks` read-only and move unchecking fully to the scheduler.
+4. Fix frontend async request handling and remove the delete delay hack.
+5. Add tag filtering.
+6. Expand tests around backend behavior and scheduling.
 
 ## Short version
 
 If only a few things get done soon, the best ones are:
 
 - validate request bodies at runtime,
+- fix the `checked` / `lastChecked` semantics,
 - remove side effects from `GET /tasks`,
 - and fix the frontend request helpers so they behave consistently.

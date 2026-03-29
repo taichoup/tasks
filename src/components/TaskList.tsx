@@ -21,6 +21,7 @@ export function TaskList() {
 
 
   // Sort: tasks without lastChecked first, by descending frequency, then the checked tasks by descending lastChecked date
+  // TODO: improve. no lastChecked means "was never checked", not "is currently unchecked" ?
   const uncheckedTasks = (tasks ?? []).filter(t => !t.lastChecked);
   const sortedUncheckedTasks = [...(uncheckedTasks ?? [])].sort(unCheckedTasksSortFunction);
   const checkedTasks = (tasks ?? []).filter(t => t.lastChecked);

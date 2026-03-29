@@ -2,6 +2,13 @@
 - needs something more robust for CORS, so as not to have to allow *
 - add a filter based on tags.
 - use Zod for schema validation and typing generation?
+- clarify the meaning of `checked` vs `lastChecked`
+    - currently a task can be auto-unchecked and the code wipes `lastChecked` back to `""`
+    - that means `lastChecked` is not really "the last time the task was completed", which is confusing and loses history
+    - decide on a cleaner model:
+        - either `lastChecked` should truly keep the last completion date even after unchecking
+        - or it should be renamed to reflect that it really means "currently checked since"
+    - update frontend sorting/grouping logic accordingly, because right now some code treats `lastChecked` as if it implied `checked === true`
 
 - update Mar 29: dev/live separation is now in place in a first version
     - separate dev lambda: `TasksHandlerDev`
