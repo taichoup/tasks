@@ -84,7 +84,8 @@ function comparePriority(a, b) {
 function formatTaskLine(task) {
     const tagsSuffix = task.tags.length > 0 ? ` [${task.tags.join(", ")}]` : "";
     const cadence = `tous les ${task.frequency.value} ${task.frequency.unit}${task.frequency.value > 1 ? "s" : ""}`;
-    return `- ${task.title} (${task.urgencyLabel}, ${cadence})${tagsSuffix}`;
+    // return `- ${task.title} (${task.urgencyLabel}, ${cadence})${tagsSuffix}`;
+    return `- ${task.title}, ${cadence})`;
 }
 
 function buildEmailBody(tasks, now) {
@@ -98,12 +99,12 @@ function buildEmailBody(tasks, now) {
             day: "numeric",
         }).format(now)}`,
         "",
-        `${dueTasks.length} tache(s) a faire maintenant.`,
+        `${dueTasks.length} tâche(s) à faire maintenant.`,
     ];
 
     if (dueTasks.length > 0) {
         lines.push("");
-        lines.push("Priorites de la semaine :");
+        lines.push("Priorités de la semaine :");
         lines.push(...dueTasks.map(formatTaskLine));
     }
 
