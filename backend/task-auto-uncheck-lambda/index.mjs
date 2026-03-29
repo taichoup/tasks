@@ -46,7 +46,7 @@ export const handler = async () => {
     const data = await DBClient.send(new ScanCommand({ TableName: TASKS_TABLE_NAME }));
     const now = new Date();
 
-    let tasks = data.Items?.map((item) => ({
+    const tasks = data.Items?.map((item) => ({
         id: item.id.S,
         title: item.title.S,
         checkedAt: item.checkedAt?.S || "",
@@ -70,30 +70,29 @@ export const handler = async () => {
         year: DAYS_IN_YEAR,
     };
 
-    tasks = tasks.map((task) => {
-        if (task.checkedAt) {
-            const last = new Date(task.checkedAt);
-            const diffDaysEffective = (now.getTime() - last.getTime()) / (1000 * 60 * 60 * 24);
-            const diffDaysAllowed = task.frequency.value * unitToDaysMap[task.frequency.unit];
-            const shouldUncheck = Math.floor(diffDaysEffective) >= diffDaysAllowed;
+    for (const task of tasks) {
+        if (!task.checkedAt) continue;
 
-            console.log(
-                "DEBUG: Task %s: diffDaysEffective: %s, diffDaysAllowed: %s, shouldUncheck: %s",
-                task.title,
-                diffDaysEffective,
-                diffDaysAllowed,
-                shouldUncheck
-            );
+        const last = new Date(task.checkedAt);
+        const diffDaysEffective = (now.getTime() - last.getTime()) / (1000 * 60 * 60 * 24);
+        const diffDaysAllowed = task.frequency.value * unitToDaysMap[task.frequency.unit];
+        const shouldUncheck = Math.floor(diffDaysEffective) >= diffDaysAllowed;
 
-            if (shouldUncheck) {
-                console.log("DEBUG: Unchecking task %s", task.title);
-                task.checkedAt = "";
-                tasksToUpdate.push(task);
-                sendEmail(EMAIL_TO, "Task unchecked", `Task unchecked: ${task.title}`);
-            }
-        }
-        return task;
-    });
+        console.log(
+            "DEBUG: Task %s: diffDaysEffective: %s, diffDaysAllowed: %s, shouldUncheck: %s",
+            task.title,
+            diffDaysEffective,
+            diffDaysAllowed,
+            shouldUncheck
+        );
+
+        if (!shouldUncheck) continue;
+
+        console.log("DEBUG: Unchecking task %s", task.title);
+        task.checkedAt = "";
+        tasksToUpdate.push(task);
+        await sendEmail(EMAIL_TO, "Task unchecked", `Task unchecked: ${task.title}`);
+    }
 
     for (const task of tasksToUpdate) {
         console.log("DEBUG: Updating task %s", task.title);
