@@ -34,9 +34,6 @@ The backend now uses `checkedAt` as the meaningful current-state field:
 - `checkedAt` empty -> task is currently due
 - scheduled unchecking clears `checkedAt`
 
-Legacy records may still contain `lastChecked` / `checked`, but the backend only keeps them for compatibility while the migration settles.
-
-
 ## Deploying
 
 When modifying Lambda code:

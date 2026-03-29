@@ -10,6 +10,7 @@
     "preview": "vite preview",
     "generate:types": "openapi-typescript ./backend/openapi.yaml --output ./shared/generated-types.ts",
     "test": "vitest",
+    "backfill:checked-at": "node ./scripts/backfill-checked-at.mjs",
     "lambda:package": "./scripts/package-lambda.sh",
     "lambda:deploy": "./scripts/deploy-lambda.sh",
     "build:lambda": "npm run lambda:package -- tasks-lambda zod",

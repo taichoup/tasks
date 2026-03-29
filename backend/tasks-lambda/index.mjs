@@ -84,7 +84,7 @@ export const handler = async (event) => {
         let tasks = data.Items?.map((item) => ({
             id: item.id.S,
             title: item.title.S,
-            checkedAt: item.checkedAt?.S || item.lastChecked?.S || "",
+            checkedAt: item.checkedAt?.S || "",
             frequency: {
                 value: parseInt(item.frequency.M.value.N, 10),
                 unit: item.frequency.M.unit.S
@@ -133,7 +133,7 @@ export const handler = async (event) => {
                 new UpdateItemCommand({
                     TableName: TASKS_TABLE_NAME,
                     Key: { id: { S: task.id } },
-                    UpdateExpression: "SET checkedAt = :checkedAt REMOVE checked, lastChecked",
+                    UpdateExpression: "SET checkedAt = :checkedAt",
                     ExpressionAttributeValues: {
                         ":checkedAt": { S: "" }
                     }
@@ -191,12 +191,12 @@ export const handler = async (event) => {
         const validatedBody = updateTaskSchema.safeParse(parsedBody.data);
         if (!validatedBody.success) return validationErrorResponse(validatedBody.error);
         const body = validatedBody.data;
-        const checkedAt = body.checkedAt ?? body.lastChecked ?? "";
+        const checkedAt = body.checkedAt ?? "";
         await DBClient.send(
             new UpdateItemCommand({
                 TableName: TASKS_TABLE_NAME,
                 Key: { id: { S: body.id } },
-                UpdateExpression: "SET checkedAt = :checkedAt REMOVE checked, lastChecked",
+                UpdateExpression: "SET checkedAt = :checkedAt",
                 ExpressionAttributeValues: {
                     ":checkedAt": { S: checkedAt }
                 }

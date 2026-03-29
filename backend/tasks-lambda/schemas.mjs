@@ -14,9 +14,7 @@ export const newTaskSchema = z.object({
 
 export const updateTaskSchema = z.object({
     id: z.string().trim().min(1),
-    checked: z.boolean().optional(),
     checkedAt: z.union([z.iso.datetime(), z.literal("")]).optional(),
-    lastChecked: z.union([z.iso.datetime(), z.literal("")]).optional(),
 });
 
 export const deleteTaskSchema = z.object({

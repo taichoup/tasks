@@ -30,7 +30,7 @@ function normalizeTask(item) {
     return {
         id: item.id.S,
         title: item.title.S,
-        checkedAt: item.checkedAt?.S || item.lastChecked?.S || "",
+        checkedAt: item.checkedAt?.S || "",
         frequency: {
             value: parseInt(item.frequency.M.value.N, 10),
             unit: item.frequency.M.unit.S,
