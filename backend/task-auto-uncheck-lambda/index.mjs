@@ -5,11 +5,7 @@ import {
 } from "@aws-sdk/client-dynamodb";
 import { SESClient, SendEmailCommand } from "@aws-sdk/client-ses";
 import { normalizeTask, convertFrequencyToDays } from "../shared/taskUtils.mjs";
-
-const AWS_REGION = process.env.AWS_REGION || "eu-north-1";
-const TASKS_TABLE_NAME = process.env.TASKS_TABLE_NAME || "tasks";
-const EMAIL_FROM = process.env.EMAIL_FROM || "tasks@moulindelingoult.fr";
-const EMAIL_TO = process.env.EMAIL_TO || "dallemanuel@gmail.com";
+import { AWS_REGION, TASKS_TABLE_NAME, EMAIL_FROM, EMAIL_TO } from "../shared/config.mjs";
 
 const DBClient = new DynamoDBClient({ region: AWS_REGION });
 const mailClient = new SESClient({ region: AWS_REGION });

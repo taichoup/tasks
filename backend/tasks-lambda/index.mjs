@@ -7,7 +7,7 @@ import {
 } from "@aws-sdk/client-dynamodb";
 import { DeleteCommand } from "@aws-sdk/lib-dynamodb";
 import { randomUUID } from "crypto";
-import { AWS_REGION, TASKS_TABLE_NAME } from "./config.mjs";
+import { AWS_REGION, TASKS_TABLE_NAME } from "../shared/config.mjs";
 import { badRequestResponse, parseJsonBody, validationErrorResponse } from "./http.mjs";
 import { newTaskSchema, updateTaskSchema } from "./schemas.mjs";
 import { normalizeTask } from "../shared/taskUtils.mjs";

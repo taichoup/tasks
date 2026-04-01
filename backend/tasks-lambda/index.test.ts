@@ -47,6 +47,9 @@ vi.mock("@aws-sdk/lib-dynamodb", () => {
 let handler;
 
 beforeAll(async () => {
+    vi.stubEnv("TASKS_TABLE_NAME", "test-tasks");
+    vi.stubEnv("EMAIL_FROM", "from@example.com");
+    vi.stubEnv("EMAIL_TO", "to@example.com");
     ({ handler } = await import("./index.mjs"));
 });
 
