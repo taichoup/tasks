@@ -4,6 +4,7 @@ import {
     UpdateItemCommand
 } from "@aws-sdk/client-dynamodb";
 import { SESClient, SendEmailCommand } from "@aws-sdk/client-ses";
+import { normalizeTask, convertFrequencyToDays } from "../shared/taskUtils.mjs";
 
 const AWS_REGION = process.env.AWS_REGION || "eu-north-1";
 const TASKS_TABLE_NAME = process.env.TASKS_TABLE_NAME || "tasks";
@@ -46,36 +47,18 @@ export const handler = async () => {
     const data = await DBClient.send(new ScanCommand({ TableName: TASKS_TABLE_NAME }));
     const now = new Date();
 
-    const tasks = data.Items?.map((item) => ({
-        id: item.id.S,
-        title: item.title.S,
-        checkedAt: item.checkedAt?.S || "",
-        frequency: {
-            value: parseInt(item.frequency.M.value.N, 10),
-            unit: item.frequency.M.unit.S
-        },
-        tags: item.tags?.L?.map((tag) => tag.S) || [],
-    })) || [];
+    const tasks = data.Items?.map(normalizeTask) || [];
 
     console.log("DEBUG: Tasks: %o", tasks);
 
     const tasksToUpdate = [];
-    const DAYS_IN_WEEK = 7;
-    const DAYS_IN_MONTH = 30;
-    const DAYS_IN_YEAR = 365;
-    const unitToDaysMap = {
-        day: 1,
-        week: DAYS_IN_WEEK,
-        month: DAYS_IN_MONTH,
-        year: DAYS_IN_YEAR,
-    };
 
     for (const task of tasks) {
         if (!task.checkedAt) continue;
 
         const last = new Date(task.checkedAt);
         const diffDaysEffective = (now.getTime() - last.getTime()) / (1000 * 60 * 60 * 24);
-        const diffDaysAllowed = task.frequency.value * unitToDaysMap[task.frequency.unit];
+        const diffDaysAllowed = convertFrequencyToDays(task);
         const shouldUncheck = Math.floor(diffDaysEffective) >= diffDaysAllowed;
 
         console.log(

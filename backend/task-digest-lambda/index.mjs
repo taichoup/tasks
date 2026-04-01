@@ -3,6 +3,7 @@
 
 import { DynamoDBClient, ScanCommand } from "@aws-sdk/client-dynamodb";
 import { SESClient, SendEmailCommand } from "@aws-sdk/client-ses";
+import { normalizeTask, convertFrequencyToDays } from "../shared/taskUtils.mjs";
 
 const AWS_REGION = process.env.AWS_REGION || "eu-north-1";
 const TASKS_TABLE_NAME = process.env.TASKS_TABLE_NAME || "tasks";
@@ -14,30 +15,6 @@ const DBClient = new DynamoDBClient({ region: AWS_REGION });
 const mailClient = new SESClient({ region: AWS_REGION });
 
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
-
-function convertFrequencyToDays(task) {
-    const unitToDaysMap = {
-        day: 1,
-        week: 7,
-        month: 30,
-        year: 365,
-    };
-
-    return task.frequency.value * unitToDaysMap[task.frequency.unit];
-}
-
-function normalizeTask(item) {
-    return {
-        id: item.id.S,
-        title: item.title.S,
-        checkedAt: item.checkedAt?.S || "",
-        frequency: {
-            value: parseInt(item.frequency.M.value.N, 10),
-            unit: item.frequency.M.unit.S,
-        },
-        tags: item.tags?.L?.map((tag) => tag.S) || [],
-    };
-}
 
 function buildPriorityView(task, now) {
     const recurrenceDays = convertFrequencyToDays(task);

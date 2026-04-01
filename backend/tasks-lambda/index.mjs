@@ -10,6 +10,7 @@ import { randomUUID } from "crypto";
 import { AWS_REGION, TASKS_TABLE_NAME } from "./config.mjs";
 import { badRequestResponse, parseJsonBody, validationErrorResponse } from "./http.mjs";
 import { newTaskSchema, updateTaskSchema } from "./schemas.mjs";
+import { normalizeTask } from "../shared/taskUtils.mjs";
 
 /**
  * @typedef {import("../shared/types").Task} Task
@@ -48,16 +49,7 @@ export const handler = async (event) => {
         const data = await DBClient.send(new ScanCommand({ TableName: TASKS_TABLE_NAME }));
 
         // Convert raw DynamoDB items to Task[]
-        const tasks = data.Items?.map((item) => ({
-            id: item.id.S,
-            title: item.title.S,
-            checkedAt: item.checkedAt?.S || "",
-            frequency: {
-                value: parseInt(item.frequency.M.value.N, 10),
-                unit: item.frequency.M.unit.S
-            },
-            tags: item.tags?.L?.map((tag) => tag.S) || [],
-        })) || [];
+        const tasks = data.Items?.map(normalizeTask) || [];
 
         return {
             statusCode: 200,
