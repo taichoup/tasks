@@ -3,15 +3,24 @@
 
 import { DynamoDBClient, ScanCommand } from "@aws-sdk/client-dynamodb";
 import { SESClient, SendEmailCommand } from "@aws-sdk/client-ses";
-import { normalizeTask, convertFrequencyToDays } from "../shared/taskUtils.mjs";
-import { AWS_REGION, TASKS_TABLE_NAME, EMAIL_FROM, EMAIL_TO, DIGEST_MAX_TASKS } from "../shared/config.mjs";
+import { normalizeTask, convertFrequencyToDays } from "../shared/taskUtils.js";
+import type { Task, DynamoDBRawTask } from "../shared/taskUtils.js";
+import { AWS_REGION, TASKS_TABLE_NAME, EMAIL_FROM, EMAIL_TO, DIGEST_MAX_TASKS } from "../shared/config.js";
 
 const DBClient = new DynamoDBClient({ region: AWS_REGION });
 const mailClient = new SESClient({ region: AWS_REGION });
 
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
 
-function buildPriorityView(task, now) {
+type PriorityTask = Task & {
+    recurrenceDays: number;
+    urgencyBucket: number;
+    urgencyLabel: string;
+    nextDueAt?: Date;
+    daysUntilDue?: number;
+};
+
+function buildPriorityView(task: Task, now: Date): PriorityTask {
     const recurrenceDays = convertFrequencyToDays(task);
     const isDueNow = !task.checkedAt;
 
@@ -41,7 +50,7 @@ function buildPriorityView(task, now) {
     };
 }
 
-function comparePriority(a, b) {
+function comparePriority(a: PriorityTask, b: PriorityTask): number {
     if (a.urgencyBucket !== b.urgencyBucket) {
         return a.urgencyBucket - b.urgencyBucket;
     }
@@ -53,19 +62,19 @@ function comparePriority(a, b) {
     return a.title.localeCompare(b.title, "fr");
 }
 
-function formatTaskLine(task) {
+function formatTaskLine(task: PriorityTask): string {
     const duration = {
         years: task.frequency.unit === "year" ? task.frequency.value : 0,
         months: task.frequency.unit === "month" ? task.frequency.value : 0,
         weeks: task.frequency.unit === "week" ? task.frequency.value : 0,
         days: task.frequency.unit === "day" ? task.frequency.value : 0,
     };
-    const cadence = new Intl.DurationFormat("fr-FR", { style: "long", units: task.frequency.unit }).format(duration);
+    const cadence = new Intl.DurationFormat("fr-FR", { style: "long" }).format(duration);
     const formattedCadence = `tous les ${cadence}`;
     return `- ${task.title}, ${formattedCadence}`;
 }
 
-function buildEmailBody(tasks, now) {
+function buildEmailBody(tasks: PriorityTask[], now: Date): string {
     const dueTasks = tasks.filter((task) => task.urgencyBucket === 0);
     const upcomingTasks = tasks.filter((task) => task.urgencyBucket === 1);
     const lines = [
@@ -94,7 +103,7 @@ function buildEmailBody(tasks, now) {
     return lines.join("\n");
 }
 
-async function sendEmail(subject, body) {
+async function sendEmail(subject: string, body: string) {
     const command = new SendEmailCommand({
         Destination: {
             ToAddresses: [EMAIL_TO],
@@ -118,7 +127,7 @@ async function sendEmail(subject, body) {
 export const handler = async () => {
     const now = new Date();
     const data = await DBClient.send(new ScanCommand({ TableName: TASKS_TABLE_NAME }));
-    const tasks = (data.Items || []).map(normalizeTask);
+    const tasks = (data.Items ?? []).map(item => normalizeTask(item as unknown as DynamoDBRawTask));
 
     const prioritizedTasks = tasks
         .map((task) => buildPriorityView(task, now))

@@ -16,4 +16,3 @@ export const updateTaskSchema = z.object({
     id: z.string().trim().min(1),
     checkedAt: z.union([z.iso.datetime(), z.literal("")]).optional(),
 });
-

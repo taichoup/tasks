@@ -1,16 +1,17 @@
 import {
     DynamoDBClient,
     ScanCommand,
-    UpdateItemCommand
+    UpdateItemCommand,
 } from "@aws-sdk/client-dynamodb";
 import { SESClient, SendEmailCommand } from "@aws-sdk/client-ses";
-import { normalizeTask, convertFrequencyToDays } from "../shared/taskUtils.mjs";
-import { AWS_REGION, TASKS_TABLE_NAME, EMAIL_FROM, EMAIL_TO } from "../shared/config.mjs";
+import { normalizeTask, convertFrequencyToDays } from "../shared/taskUtils.js";
+import type { DynamoDBRawTask } from "../shared/taskUtils.js";
+import { AWS_REGION, TASKS_TABLE_NAME, EMAIL_FROM, EMAIL_TO } from "../shared/config.js";
 
 const DBClient = new DynamoDBClient({ region: AWS_REGION });
 const mailClient = new SESClient({ region: AWS_REGION });
 
-async function sendEmail(to, subject, body) {
+async function sendEmail(to: string, subject: string, body: string) {
     const params = {
         Destination: {
             ToAddresses: [to],
@@ -43,7 +44,7 @@ export const handler = async () => {
     const data = await DBClient.send(new ScanCommand({ TableName: TASKS_TABLE_NAME }));
     const now = new Date();
 
-    const tasks = data.Items?.map(normalizeTask) || [];
+    const tasks = data.Items?.map(item => normalizeTask(item as unknown as DynamoDBRawTask)) ?? [];
 
     console.log("DEBUG: Tasks: %o", tasks);
 
@@ -82,8 +83,8 @@ export const handler = async () => {
                 Key: { id: { S: task.id } },
                 UpdateExpression: "SET checkedAt = :checkedAt",
                 ExpressionAttributeValues: {
-                    ":checkedAt": { S: "" }
-                }
+                    ":checkedAt": { S: "" },
+                },
             })
         );
     }

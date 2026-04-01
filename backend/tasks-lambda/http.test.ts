@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { invalidJsonResponse, parseJsonBody, validationErrorResponse } from "./http.mjs";
-import { newTaskSchema } from "./schemas.mjs";
+import { invalidJsonResponse, parseJsonBody, validationErrorResponse } from "./http.js";
+import { newTaskSchema } from "./schemas.js";
 
 describe("parseJsonBody", () => {
     it("parses valid JSON bodies", () => {

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { newTaskSchema, updateTaskSchema } from "./schemas.mjs";
+import { newTaskSchema, updateTaskSchema } from "./schemas.js";
 
 describe("newTaskSchema", () => {
     it("defaults tags to an empty array", () => {

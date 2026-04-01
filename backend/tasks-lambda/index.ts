@@ -1,24 +1,27 @@
-// @ts-check
 import {
     DynamoDBClient,
     ScanCommand,
     PutItemCommand,
-    UpdateItemCommand
+    UpdateItemCommand,
 } from "@aws-sdk/client-dynamodb";
 import { DeleteCommand } from "@aws-sdk/lib-dynamodb";
 import { randomUUID } from "crypto";
-import { AWS_REGION, TASKS_TABLE_NAME } from "../shared/config.mjs";
-import { badRequestResponse, parseJsonBody, validationErrorResponse } from "./http.mjs";
-import { newTaskSchema, updateTaskSchema } from "./schemas.mjs";
-import { normalizeTask } from "../shared/taskUtils.mjs";
+import { AWS_REGION, TASKS_TABLE_NAME } from "../shared/config.js";
+import { badRequestResponse, parseJsonBody, validationErrorResponse } from "./http.js";
+import { newTaskSchema, updateTaskSchema } from "./schemas.js";
+import { normalizeTask } from "../shared/taskUtils.js";
+import type { DynamoDBRawTask } from "../shared/taskUtils.js";
 
-/**
- * @typedef {import("../shared/types").Task} Task
- */
+type LambdaEvent = {
+    httpMethod?: string;
+    requestContext?: { http?: { method?: string } };
+    body?: string | null;
+    pathParameters?: Record<string, string>;
+};
 
 const DBClient = new DynamoDBClient({ region: AWS_REGION });
 
-async function deleteTask(taskId) {
+async function deleteTask(taskId: string) {
     try {
         const command = new DeleteCommand({
             TableName: TASKS_TABLE_NAME,
@@ -33,7 +36,8 @@ async function deleteTask(taskId) {
         console.log("DEBUG: Deleted task:", taskId, result);
         return result;
     } catch (err) {
-        if (err.name === "ConditionalCheckFailedException") {
+        const error = err as { name?: string };
+        if (error.name === "ConditionalCheckFailedException") {
             console.error(`Task with ID ${taskId} does not exist.`);
         } else {
             console.error("Error deleting task:", err);
@@ -42,14 +46,14 @@ async function deleteTask(taskId) {
     }
 }
 
-export const handler = async (event) => {
-    const method = event.requestContext?.http?.method || event.httpMethod;
+export const handler = async (event: LambdaEvent) => {
+    const method = event.requestContext?.http?.method ?? event.httpMethod;
 
     if (method === "GET") {
         const data = await DBClient.send(new ScanCommand({ TableName: TASKS_TABLE_NAME }));
 
         // Convert raw DynamoDB items to Task[]
-        const tasks = data.Items?.map(normalizeTask) || [];
+        const tasks = data.Items?.map(item => normalizeTask(item as unknown as DynamoDBRawTask)) ?? [];
 
         return {
             statusCode: 200,
@@ -79,18 +83,18 @@ export const handler = async (event) => {
                     frequency: {
                         M: {
                             unit: { S: body.frequency.unit },
-                            value: { N: body.frequency.value.toString() }
-                        }
+                            value: { N: body.frequency.value.toString() },
+                        },
                     },
-                    tags: { L: body.tags.map((tag) => ({ S: tag })) }
-                }
+                    tags: { L: body.tags.map((tag) => ({ S: tag })) },
+                },
             })
         );
         return {
             statusCode: 201,
             body: JSON.stringify({ message: "Task added" }),
             headers: {
-                "Access-Control-Allow-Origin": "*"
+                "Access-Control-Allow-Origin": "*",
             },
         };
     }
@@ -108,8 +112,8 @@ export const handler = async (event) => {
                 Key: { id: { S: body.id } },
                 UpdateExpression: "SET checkedAt = :checkedAt",
                 ExpressionAttributeValues: {
-                    ":checkedAt": { S: checkedAt }
-                }
+                    ":checkedAt": { S: checkedAt },
+                },
             })
         );
         return {
@@ -138,11 +142,10 @@ export const handler = async (event) => {
             headers: {
                 "Access-Control-Allow-Origin": "*",
                 "Access-Control-Allow-Headers": "Content-Type,X-Amz-Date,Authorization,X-Api-Key",
-                "Access-Control-Allow-Methods": "GET,POST,PUT,DELETE,OPTIONS"
-            }
+                "Access-Control-Allow-Methods": "GET,POST,PUT,DELETE,OPTIONS",
+            },
         };
     }
-
 
     if (method === "OPTIONS") {
         return {
@@ -156,4 +159,4 @@ export const handler = async (event) => {
     }
 
     return { statusCode: 405, body: "Method not allowed" };
-}
+};
