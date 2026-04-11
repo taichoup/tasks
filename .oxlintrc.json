@@ -1,0 +1,31 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["react", "typescript"],
+  "ignorePatterns": ["dist/**", "node_modules/**", "shared/generated-types.ts"],
+  "overrides": [
+    {
+      "files": ["src/**/*.{ts,tsx}"],
+      "env": {
+        "browser": true
+      }
+    },
+    {
+      "files": [
+        "backend/**/*.ts",
+        "scripts/**/*.mjs",
+        "*.config.ts",
+        "vite.config.ts"
+      ],
+      "env": {
+        "node": true
+      }
+    },
+    {
+      "files": ["**/*.test.ts", "**/*.test.tsx"],
+      "plugins": ["react", "typescript", "vitest"],
+      "env": {
+        "node": true
+      }
+    }
+  ]
+}
