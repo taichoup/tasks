@@ -149,19 +149,19 @@ describe("unCheckedTasksSortFunction", () => {
 
 describe("CheckedTasksSortFunction", () => {
   it("sorts checked tasks by ascending remaining time until automatic uncheck", () => {
-    const t1 = {
+    const t1: Task = {
       ...BASE_TASK,
       id: "task-1",
       frequency: { unit: "week", value: 1 },
       checkedAt: "2026-04-06T12:00:00.000Z",
     }; // 1 day remaining
-    const t2 = {
+    const t2: Task = {
       ...BASE_TASK,
       id: "task-2",
       frequency: { unit: "day", value: 2 },
       checkedAt: "2026-04-11T12:00:00.000Z",
     }; // 1 day remaining
-    const t3 = {
+    const t3: Task = {
       ...BASE_TASK,
       id: "task-3",
       frequency: { unit: "month", value: 1 },
@@ -183,13 +183,13 @@ describe("CheckedTasksSortFunction", () => {
   });
 
   it("returns 0 for tasks with the same remaining time", () => {
-    const t1 = {
+    const t1: Task = {
       ...BASE_TASK,
       id: "task-1",
       frequency: { unit: "week", value: 1 },
       checkedAt: "2026-04-06T12:00:00.000Z",
     };
-    const t2 = {
+    const t2: Task = {
       ...BASE_TASK,
       id: "task-2",
       frequency: { unit: "day", value: 1 },

@@ -10,22 +10,29 @@ import {
   YEAR_IN_MS,
 } from "./constants";
 
-export const isSameFrequency = (a: Task, b: Task) => {
+const FREQUENCY_UNIT_TO_MS: Record<Task["frequency"]["unit"], number> = {
+  day: DAY_IN_MS,
+  week: WEEK_IN_MS,
+  month: MONTH_IN_MS,
+  year: YEAR_IN_MS,
+};
+
+export const isSameFrequency = (a: Task, b: Task): boolean => {
   return (
     a.frequency.unit === b.frequency.unit &&
     a.frequency.value === b.frequency.value
   );
 };
 
-export const isSameUnit = (a: Task, b: Task) => {
+export const isSameUnit = (a: Task, b: Task): boolean => {
   return a.frequency.unit === b.frequency.unit;
 };
 
-export const isSameValue = (a: Task, b: Task) => {
+export const isSameValue = (a: Task, b: Task): boolean => {
   return a.frequency.value === b.frequency.value;
 };
 
-export const convertTaskToDays = (task: Task) => {
+export const convertTaskToDays = (task: Task): number => {
   const { frequency } = task;
   if (frequency.unit === "day") {
     return frequency.value;
@@ -48,18 +55,14 @@ export const convertTaskToDays = (task: Task) => {
  * @returns The remaining time until the task is unchecked, in Intl.DurationInput format.
  */
 export const computeRemainingTimeUntilUncheck_ms = (task: Task): number => {
-  if (!task.checkedAt || !task.frequency) {
+  if (!task.checkedAt) {
     return 0;
   }
+
   const checkedAt = new Date(task.checkedAt);
   const now = new Date();
   const frequencyInMs =
-    {
-      day: DAY_IN_MS,
-      week: WEEK_IN_MS,
-      month: MONTH_IN_MS,
-      year: YEAR_IN_MS,
-    }[task.frequency.unit] * task.frequency.value;
+    FREQUENCY_UNIT_TO_MS[task.frequency.unit] * task.frequency.value;
 
   const nextUncheckTime = new Date(checkedAt.getTime() + frequencyInMs);
   const timeDiff = nextUncheckTime.getTime() - now.getTime();
@@ -81,7 +84,7 @@ export const computeRemainingTimeUntilUncheck_duration = (
 /**
  * Sort function for unchecked tasks. Tasks with shorter frequency (in days) will be sorted first.
  */
-export const unCheckedTasksSortFunction = (a: Task, b: Task) => {
+export const unCheckedTasksSortFunction = (a: Task, b: Task): number => {
   return convertTaskToDays(a) - convertTaskToDays(b);
 };
 
@@ -89,7 +92,7 @@ export const unCheckedTasksSortFunction = (a: Task, b: Task) => {
  * Sort function for checked tasks. We are assuming here that both tasks have a checkedAt value
  * We want the tasks sorted by ascending remaining time until they get unchecked automatically
  */
-export const CheckedTasksSortFunction = (a: Task, b: Task) => {
+export const CheckedTasksSortFunction = (a: Task, b: Task): number => {
   const remainingTimeForA = computeRemainingTimeUntilUncheck_ms(a);
   const remainingTimeForB = computeRemainingTimeUntilUncheck_ms(b);
   return remainingTimeForA - remainingTimeForB;
