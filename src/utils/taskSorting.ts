@@ -2,6 +2,7 @@
   // TODO: write unit tests
 
 import type { Task } from "../types/derived";
+import { DAY_IN_MS, HOUR_IN_MS, MINUTE_IN_MS, MONTH_IN_MS, WEEK_IN_MS, YEAR_IN_MS } from "./constants";
 
   
   export const isSameFrequency = (a: Task, b: Task) => {
@@ -33,6 +34,37 @@ import type { Task } from "../types/derived";
     return 0;
   };
 
+  /**
+   * Computes the remaining time until a task is unchecked.
+   * @param task The task to compute the remaining time for.
+   * @returns The remaining time until the task is unchecked, in Intl.DurationInput format.
+   */
+  export const computeRemainingTimeUntilUncheck = (task: Task): Intl.DurationInput => {
+    if (!task.checkedAt || !task.frequency) {
+      return { days: 0, hours: 0, minutes: 0 };
+    }
+    const checkedAt = new Date(task.checkedAt);
+    const now = new Date();
+    const frequencyInMs = {
+        day: DAY_IN_MS,
+        week: WEEK_IN_MS,
+        month: MONTH_IN_MS,
+        year: YEAR_IN_MS,
+    }[task.frequency.unit] * task.frequency.value;
+
+    const nextUncheckTime = new Date(checkedAt.getTime() + frequencyInMs);
+    const timeDiff = nextUncheckTime.getTime() - now.getTime();
+
+    return {
+        days: Math.floor(timeDiff / DAY_IN_MS),
+        hours: Math.floor((timeDiff % DAY_IN_MS) / HOUR_IN_MS),
+        minutes: Math.floor((timeDiff % HOUR_IN_MS) / MINUTE_IN_MS),
+    };
+  };
+
+  /**
+   * Sort function for unchecked tasks. Tasks with shorter frequency (in days) will be sorted first.
+   */
   export const unCheckedTasksSortFunction = (a: Task, b: Task) => {
     return convertTaskToDays(a) - convertTaskToDays(b);
   };
