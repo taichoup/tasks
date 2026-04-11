@@ -73,22 +73,22 @@ Important note:
 
 All three Lambdas (and `TasksHandlerDev`) use a subdirectory handler path due to the shared module structure:
 
-| Lambda | Handler |
-|---|---|
-| `TasksHandler` | `tasks-lambda/index.handler` |
-| `TasksHandlerDev` | `tasks-lambda/index.handler` |
+| Lambda            | Handler                                  |
+| ----------------- | ---------------------------------------- |
+| `TasksHandler`    | `tasks-lambda/index.handler`             |
+| `TasksHandlerDev` | `tasks-lambda/index.handler`             |
 | `TaskAutoUncheck` | `task-auto-uncheck-lambda/index.handler` |
-| `TaskDigest` | `task-digest-lambda/index.handler` |
+| `TaskDigest`      | `task-digest-lambda/index.handler`       |
 
 ### Lambda environment variables
 
 All Lambdas require these to be set in AWS (Configuration → Environment variables):
 
-| Variable | Used by |
-|---|---|
-| `TASKS_TABLE_NAME` | all three |
-| `EMAIL_FROM` | TaskAutoUncheck, TaskDigest |
-| `EMAIL_TO` | TaskAutoUncheck, TaskDigest |
+| Variable           | Used by                               |
+| ------------------ | ------------------------------------- |
+| `TASKS_TABLE_NAME` | all three                             |
+| `EMAIL_FROM`       | TaskAutoUncheck, TaskDigest           |
+| `EMAIL_TO`         | TaskAutoUncheck, TaskDigest           |
 | `DIGEST_MAX_TASKS` | TaskDigest (optional, defaults to 10) |
 
 `AWS_REGION` is injected automatically by the Lambda runtime.

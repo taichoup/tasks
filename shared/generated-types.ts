@@ -4,204 +4,204 @@
  */
 
 export interface paths {
-    "/tasks": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description List of tasks */
-                200: {
-                    headers: {
-                        "Access-Control-Allow-Origin"?: string;
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ArrayOfTask"];
-                    };
-                };
-            };
-        };
-        /** Update a task */
-        put: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    "application/json": components["schemas"]["UpdateTask"];
-                };
-            };
-            responses: {
-                /** @description Task updated */
-                200: {
-                    headers: {
-                        "Access-Control-Allow-Origin"?: string;
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-            };
-        };
-        /** Create a new task */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    "application/json": components["schemas"]["NewTask"];
-                };
-            };
-            responses: {
-                /** @description Task created */
-                201: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-            };
-        };
-        delete?: never;
-        options: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description CORS preflight response */
-                200: {
-                    headers: {
-                        "Access-Control-Allow-Origin"?: string;
-                        "Access-Control-Allow-Methods"?: string;
-                        "Access-Control-Allow-Headers"?: string;
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-            };
-        };
-        head?: never;
-        patch?: never;
-        trace?: never;
+  "/tasks": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/tasks/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description List of tasks */
+        200: {
+          headers: {
+            "Access-Control-Allow-Origin"?: string;
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["ArrayOfTask"];
+          };
         };
-        get?: never;
-        put?: never;
-        post?: never;
-        delete: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    id: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Task deleted */
-                204: {
-                    headers: {
-                        "Access-Control-Allow-Origin"?: string;
-                        "Access-Control-Allow-Methods"?: string;
-                        "Access-Control-Allow-Headers"?: string;
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-            };
-        };
-        options: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    id: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description CORS preflight response */
-                200: {
-                    headers: {
-                        "Access-Control-Allow-Origin"?: string;
-                        "Access-Control-Allow-Methods"?: string;
-                        "Access-Control-Allow-Headers"?: string;
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-            };
-        };
-        head?: never;
-        patch?: never;
-        trace?: never;
+      };
     };
+    /** Update a task */
+    put: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          "application/json": components["schemas"]["UpdateTask"];
+        };
+      };
+      responses: {
+        /** @description Task updated */
+        200: {
+          headers: {
+            "Access-Control-Allow-Origin"?: string;
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+      };
+    };
+    /** Create a new task */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          "application/json": components["schemas"]["NewTask"];
+        };
+      };
+      responses: {
+        /** @description Task created */
+        201: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+      };
+    };
+    delete?: never;
+    options: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description CORS preflight response */
+        200: {
+          headers: {
+            "Access-Control-Allow-Origin"?: string;
+            "Access-Control-Allow-Methods"?: string;
+            "Access-Control-Allow-Headers"?: string;
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+      };
+    };
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/tasks/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    delete: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Task deleted */
+        204: {
+          headers: {
+            "Access-Control-Allow-Origin"?: string;
+            "Access-Control-Allow-Methods"?: string;
+            "Access-Control-Allow-Headers"?: string;
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+      };
+    };
+    options: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description CORS preflight response */
+        200: {
+          headers: {
+            "Access-Control-Allow-Origin"?: string;
+            "Access-Control-Allow-Methods"?: string;
+            "Access-Control-Allow-Headers"?: string;
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+      };
+    };
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
-    schemas: {
-        UpdateTask: {
-            id: string;
-            checkedAt?: string | "";
-        };
-        NewTask: {
-            title: string;
-            frequency: {
-                /** Format: int32 */
-                value: number;
-                /** @enum {string} */
-                unit: "day" | "week" | "month" | "year";
-            };
-            tags?: ("maison" | "jardin" | "vélos" | "voiture")[];
-        };
-        ArrayOfTask: components["schemas"]["Task"][];
-        Task: {
-            id: string;
-            title: string;
-            checkedAt: string;
-            frequency: {
-                /** Format: int32 */
-                value: number;
-                /** @enum {string} */
-                unit: "day" | "week" | "month" | "year";
-            };
-            tags?: ("maison" | "jardin" | "vélos" | "voiture")[];
-        };
+  schemas: {
+    UpdateTask: {
+      id: string;
+      checkedAt?: string | "";
     };
-    responses: never;
-    parameters: never;
-    requestBodies: never;
-    headers: never;
-    pathItems: never;
+    NewTask: {
+      title: string;
+      frequency: {
+        /** Format: int32 */
+        value: number;
+        /** @enum {string} */
+        unit: "day" | "week" | "month" | "year";
+      };
+      tags?: ("maison" | "jardin" | "vélos" | "voiture")[];
+    };
+    ArrayOfTask: components["schemas"]["Task"][];
+    Task: {
+      id: string;
+      title: string;
+      checkedAt: string;
+      frequency: {
+        /** Format: int32 */
+        value: number;
+        /** @enum {string} */
+        unit: "day" | "week" | "month" | "year";
+      };
+      tags?: ("maison" | "jardin" | "vélos" | "voiture")[];
+    };
+  };
+  responses: never;
+  parameters: never;
+  requestBodies: never;
+  headers: never;
+  pathItems: never;
 }
 export type $defs = Record<string, never>;
 export type operations = Record<string, never>;

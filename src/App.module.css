@@ -11,7 +11,8 @@
   width: 50px;
 }
 
-.addTaskForm select, button {
+.addTaskForm select,
+button {
   height: 2rem;
 }
 

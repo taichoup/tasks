@@ -3,7 +3,7 @@ info:
   title: Task API
   version: 1.0.0
 servers:
-- url: https://6s6jd82e80.execute-api.eu-north-1.amazonaws.com/preprod
+  - url: https://6s6jd82e80.execute-api.eu-north-1.amazonaws.com/preprod
 paths:
   /tasks:
     get:
@@ -17,14 +17,14 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ArrayOfTask'
+                $ref: "#/components/schemas/ArrayOfTask"
     put:
       summary: Update a task
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UpdateTask'
+              $ref: "#/components/schemas/UpdateTask"
         required: true
       responses:
         "200":
@@ -41,7 +41,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/NewTask'
+              $ref: "#/components/schemas/NewTask"
         required: true
       responses:
         "201":
@@ -66,11 +66,11 @@ paths:
   /tasks/{id}:
     delete:
       parameters:
-      - name: id
-        in: path
-        required: true
-        schema:
-          type: string
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
       responses:
         "204":
           description: Task deleted
@@ -87,11 +87,11 @@ paths:
           content: {}
     options:
       parameters:
-      - name: id
-        in: path
-        required: true
-        schema:
-          type: string
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
       responses:
         "200":
           description: CORS preflight response
@@ -146,7 +146,7 @@ components:
     ArrayOfTask:
       type: array
       items:
-        $ref: '#/components/schemas/Task'
+        $ref: "#/components/schemas/Task"
     Task:
       type: object
       required: [id, title, checkedAt, frequency]

@@ -3,7 +3,9 @@ import { execFileSync } from "node:child_process";
 const [, , tableNameArg, ...restArgs] = process.argv;
 
 if (!tableNameArg) {
-  console.error("Usage: node ./scripts/backfill-checked-at.mjs <table-name> [--apply]");
+  console.error(
+    "Usage: node ./scripts/backfill-checked-at.mjs <table-name> [--apply]",
+  );
   process.exit(1);
 }
 
@@ -31,7 +33,14 @@ function scanAllItems(tableName) {
   let exclusiveStartKey;
 
   do {
-    const args = ["dynamodb", "scan", "--table-name", tableName, "--output", "json"];
+    const args = [
+      "dynamodb",
+      "scan",
+      "--table-name",
+      tableName,
+      "--output",
+      "json",
+    ];
     if (exclusiveStartKey) {
       args.push("--exclusive-start-key", JSON.stringify(exclusiveStartKey));
     }
@@ -79,8 +88,8 @@ console.log(
       mode: shouldApply ? "apply" : "dry-run",
     },
     null,
-    2
-  )
+    2,
+  ),
 );
 
 if (!shouldApply) {
@@ -93,4 +102,6 @@ for (const item of itemsToMigrate) {
   execFileSync("aws", [...args, "--region", region], { stdio: "inherit" });
 }
 
-console.log(`Backfill complete for ${tableNameArg}. Migrated ${itemsToMigrate.length} item(s).`);
+console.log(
+  `Backfill complete for ${tableNameArg}. Migrated ${itemsToMigrate.length} item(s).`,
+);

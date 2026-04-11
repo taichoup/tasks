@@ -19,19 +19,41 @@ const BASE_TASK: Task = {
 
 describe("convertTaskToDays", () => {
   it("converts days correctly", () => {
-    expect(convertTaskToDays({ ...BASE_TASK, frequency: { unit: "day", value: 3 } })).toBe(3);
+    expect(
+      convertTaskToDays({ ...BASE_TASK, frequency: { unit: "day", value: 3 } }),
+    ).toBe(3);
   });
   it("converts weeks correctly", () => {
-    expect(convertTaskToDays({ ...BASE_TASK, frequency: { unit: "week", value: 2 } })).toBe(14);
+    expect(
+      convertTaskToDays({
+        ...BASE_TASK,
+        frequency: { unit: "week", value: 2 },
+      }),
+    ).toBe(14);
   });
   it("converts months correctly", () => {
-    expect(convertTaskToDays({ ...BASE_TASK, frequency: { unit: "month", value: 1 } })).toBe(30);
+    expect(
+      convertTaskToDays({
+        ...BASE_TASK,
+        frequency: { unit: "month", value: 1 },
+      }),
+    ).toBe(30);
   });
   it("converts years correctly", () => {
-    expect(convertTaskToDays({ ...BASE_TASK, frequency: { unit: "year", value: 1 } })).toBe(365);
+    expect(
+      convertTaskToDays({
+        ...BASE_TASK,
+        frequency: { unit: "year", value: 1 },
+      }),
+    ).toBe(365);
   });
   it("returns 0 for unknown unit", () => {
-    expect(convertTaskToDays({ ...BASE_TASK, frequency: { unit: "unknown" as any, value: 1 } })).toBe(0);
+    expect(
+      convertTaskToDays({
+        ...BASE_TASK,
+        frequency: { unit: "unknown" as any, value: 1 },
+      }),
+    ).toBe(0);
   });
 });
 
@@ -78,9 +100,21 @@ describe("isSameValue", () => {
 
 describe("unCheckedTasksSortFunction", () => {
   it("sorts unchecked tasks by ascending frequency (converted to days)", () => {
-    const t1 = { ...BASE_TASK, frequency: { unit: "week", value: 1 }, checkedAt: "" } as Task;
-    const t2 = { ...BASE_TASK, frequency: { unit: "day", value: 3 }, checkedAt: "" } as Task;
-    const t3 = { ...BASE_TASK, frequency: { unit: "month", value: 1 }, checkedAt: "" } as Task;
+    const t1 = {
+      ...BASE_TASK,
+      frequency: { unit: "week", value: 1 },
+      checkedAt: "",
+    } as Task;
+    const t2 = {
+      ...BASE_TASK,
+      frequency: { unit: "day", value: 3 },
+      checkedAt: "",
+    } as Task;
+    const t3 = {
+      ...BASE_TASK,
+      frequency: { unit: "month", value: 1 },
+      checkedAt: "",
+    } as Task;
     const arr = [t1, t2, t3];
     const sorted = [...arr].sort(unCheckedTasksSortFunction);
     expect(sorted[0]).toBe(t2); // day (3 days)
@@ -89,8 +123,16 @@ describe("unCheckedTasksSortFunction", () => {
   });
 
   it("returns 0 for tasks with same frequency", () => {
-    const t1 = { ...BASE_TASK, frequency: { unit: "day", value: 1 }, checkedAt: "" } as Task;
-    const t2 = { ...BASE_TASK, frequency: { unit: "day", value: 1 }, checkedAt: "" } as Task;
+    const t1 = {
+      ...BASE_TASK,
+      frequency: { unit: "day", value: 1 },
+      checkedAt: "",
+    } as Task;
+    const t2 = {
+      ...BASE_TASK,
+      frequency: { unit: "day", value: 1 },
+      checkedAt: "",
+    } as Task;
     expect(unCheckedTasksSortFunction(t1, t2)).toBe(0);
   });
 });
@@ -98,8 +140,14 @@ describe("unCheckedTasksSortFunction", () => {
 describe("CheckedTasksSortFunction", () => {
   it("sorts checked tasks by descending checkedAt date", () => {
     const now = Date.now();
-    const t1 = { ...BASE_TASK, checkedAt: new Date(now - 1000 * 60 * 60 * 24).toISOString() }; // 1 day ago
-    const t2 = { ...BASE_TASK, checkedAt: new Date(now - 1000 * 60 * 60 * 48).toISOString() }; // 2 days ago
+    const t1 = {
+      ...BASE_TASK,
+      checkedAt: new Date(now - 1000 * 60 * 60 * 24).toISOString(),
+    }; // 1 day ago
+    const t2 = {
+      ...BASE_TASK,
+      checkedAt: new Date(now - 1000 * 60 * 60 * 48).toISOString(),
+    }; // 2 days ago
     const t3 = { ...BASE_TASK, checkedAt: new Date(now).toISOString() }; // now
     const arr = [t1, t2, t3];
     const sorted = [...arr].sort(CheckedTasksSortFunction);

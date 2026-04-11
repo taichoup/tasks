@@ -24,7 +24,7 @@ declare namespace Intl {
   class DurationFormat {
     constructor(
       locales?: string | readonly string[],
-      options?: DurationFormatOptions
+      options?: DurationFormatOptions,
     );
     format(duration: DurationInput): string;
   }

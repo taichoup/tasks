@@ -5,7 +5,13 @@ import { DynamoDBClient, ScanCommand } from "@aws-sdk/client-dynamodb";
 import { SESClient, SendEmailCommand } from "@aws-sdk/client-ses";
 import { normalizeTask, convertFrequencyToDays } from "../shared/taskUtils.js";
 import type { Task, DynamoDBRawTask } from "../shared/taskUtils.js";
-import { AWS_REGION, TASKS_TABLE_NAME, EMAIL_FROM, EMAIL_TO, DIGEST_MAX_TASKS } from "../shared/config.js";
+import {
+  AWS_REGION,
+  TASKS_TABLE_NAME,
+  EMAIL_FROM,
+  EMAIL_TO,
+  DIGEST_MAX_TASKS,
+} from "../shared/config.js";
 
 const DBClient = new DynamoDBClient({ region: AWS_REGION });
 const mailClient = new SESClient({ region: AWS_REGION });
@@ -13,139 +19,146 @@ const mailClient = new SESClient({ region: AWS_REGION });
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
 
 type PriorityTask = Task & {
-    recurrenceDays: number;
-    urgencyBucket: number;
-    urgencyLabel: string;
-    nextDueAt?: Date;
-    daysUntilDue?: number;
+  recurrenceDays: number;
+  urgencyBucket: number;
+  urgencyLabel: string;
+  nextDueAt?: Date;
+  daysUntilDue?: number;
 };
 
 function buildPriorityView(task: Task, now: Date): PriorityTask {
-    const recurrenceDays = convertFrequencyToDays(task);
-    const isDueNow = !task.checkedAt;
+  const recurrenceDays = convertFrequencyToDays(task);
+  const isDueNow = !task.checkedAt;
 
-    if (isDueNow) {
-        return {
-            ...task,
-            recurrenceDays,
-            urgencyBucket: 0,
-            urgencyLabel: "A faire",
-        };
-    }
-
-    const checkedAt = new Date(task.checkedAt);
-    const nextDueAt = new Date(checkedAt.getTime() + recurrenceDays * DAY_IN_MS);
-    const msUntilDue = nextDueAt.getTime() - now.getTime();
-    const daysUntilDue = Math.ceil(msUntilDue / DAY_IN_MS);
-
+  if (isDueNow) {
     return {
-        ...task,
-        recurrenceDays,
-        nextDueAt,
-        daysUntilDue,
-        urgencyBucket: 1,
-        urgencyLabel: daysUntilDue <= 0
-            ? "En retard"
-            : `Dans ${daysUntilDue} jour${daysUntilDue > 1 ? "s" : ""}`,
+      ...task,
+      recurrenceDays,
+      urgencyBucket: 0,
+      urgencyLabel: "A faire",
     };
+  }
+
+  const checkedAt = new Date(task.checkedAt);
+  const nextDueAt = new Date(checkedAt.getTime() + recurrenceDays * DAY_IN_MS);
+  const msUntilDue = nextDueAt.getTime() - now.getTime();
+  const daysUntilDue = Math.ceil(msUntilDue / DAY_IN_MS);
+
+  return {
+    ...task,
+    recurrenceDays,
+    nextDueAt,
+    daysUntilDue,
+    urgencyBucket: 1,
+    urgencyLabel:
+      daysUntilDue <= 0
+        ? "En retard"
+        : `Dans ${daysUntilDue} jour${daysUntilDue > 1 ? "s" : ""}`,
+  };
 }
 
 function comparePriority(a: PriorityTask, b: PriorityTask): number {
-    if (a.urgencyBucket !== b.urgencyBucket) {
-        return a.urgencyBucket - b.urgencyBucket;
-    }
+  if (a.urgencyBucket !== b.urgencyBucket) {
+    return a.urgencyBucket - b.urgencyBucket;
+  }
 
-    if (a.recurrenceDays !== b.recurrenceDays) {
-        return a.recurrenceDays - b.recurrenceDays;
-    }
+  if (a.recurrenceDays !== b.recurrenceDays) {
+    return a.recurrenceDays - b.recurrenceDays;
+  }
 
-    return a.title.localeCompare(b.title, "fr");
+  return a.title.localeCompare(b.title, "fr");
 }
 
 function formatTaskLine(task: PriorityTask): string {
-    const duration = {
-        years: task.frequency.unit === "year" ? task.frequency.value : 0,
-        months: task.frequency.unit === "month" ? task.frequency.value : 0,
-        weeks: task.frequency.unit === "week" ? task.frequency.value : 0,
-        days: task.frequency.unit === "day" ? task.frequency.value : 0,
-    };
-    const cadence = new Intl.DurationFormat("fr-FR", { style: "long" }).format(duration);
-    const formattedCadence = `tous les ${cadence}`;
-    return `- ${task.title}, ${formattedCadence}`;
+  const duration = {
+    years: task.frequency.unit === "year" ? task.frequency.value : 0,
+    months: task.frequency.unit === "month" ? task.frequency.value : 0,
+    weeks: task.frequency.unit === "week" ? task.frequency.value : 0,
+    days: task.frequency.unit === "day" ? task.frequency.value : 0,
+  };
+  const cadence = new Intl.DurationFormat("fr-FR", { style: "long" }).format(
+    duration,
+  );
+  const formattedCadence = `tous les ${cadence}`;
+  return `- ${task.title}, ${formattedCadence}`;
 }
 
 function buildEmailBody(tasks: PriorityTask[], now: Date): string {
-    const dueTasks = tasks.filter((task) => task.urgencyBucket === 0);
-    const upcomingTasks = tasks.filter((task) => task.urgencyBucket === 1);
-    const lines = [
-        `Digest du ${new Intl.DateTimeFormat("fr-FR", {
-            weekday: "long",
-            year: "numeric",
-            month: "long",
-            day: "numeric",
-        }).format(now)}`,
-        "",
-        `${dueTasks.length} tâche(s) disponible(s) :`,
-    ];
+  const dueTasks = tasks.filter((task) => task.urgencyBucket === 0);
+  const upcomingTasks = tasks.filter((task) => task.urgencyBucket === 1);
+  const lines = [
+    `Digest du ${new Intl.DateTimeFormat("fr-FR", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    }).format(now)}`,
+    "",
+    `${dueTasks.length} tâche(s) disponible(s) :`,
+  ];
 
-    if (dueTasks.length > 0) {
-        lines.push("");
-        lines.push("Non commencées :");
-        lines.push(...dueTasks.map(formatTaskLine));
-    }
+  if (dueTasks.length > 0) {
+    lines.push("");
+    lines.push("Non commencées :");
+    lines.push(...dueTasks.map(formatTaskLine));
+  }
 
-    if (upcomingTasks.length > 0) {
-        lines.push("");
-        lines.push("À refaire bientôt :");
-        lines.push(...upcomingTasks.map(formatTaskLine));
-    }
+  if (upcomingTasks.length > 0) {
+    lines.push("");
+    lines.push("À refaire bientôt :");
+    lines.push(...upcomingTasks.map(formatTaskLine));
+  }
 
-    return lines.join("\n");
+  return lines.join("\n");
 }
 
 async function sendEmail(subject: string, body: string) {
-    const command = new SendEmailCommand({
-        Destination: {
-            ToAddresses: [EMAIL_TO],
+  const command = new SendEmailCommand({
+    Destination: {
+      ToAddresses: [EMAIL_TO],
+    },
+    Message: {
+      Body: {
+        Text: {
+          Data: body,
         },
-        Message: {
-            Body: {
-                Text: {
-                    Data: body,
-                },
-            },
-            Subject: {
-                Data: subject,
-            },
-        },
-        Source: EMAIL_FROM,
-    });
+      },
+      Subject: {
+        Data: subject,
+      },
+    },
+    Source: EMAIL_FROM,
+  });
 
-    return mailClient.send(command);
+  return mailClient.send(command);
 }
 
 export const handler = async () => {
-    const now = new Date();
-    const data = await DBClient.send(new ScanCommand({ TableName: TASKS_TABLE_NAME }));
-    const tasks = (data.Items ?? []).map(item => normalizeTask(item as unknown as DynamoDBRawTask));
+  const now = new Date();
+  const data = await DBClient.send(
+    new ScanCommand({ TableName: TASKS_TABLE_NAME }),
+  );
+  const tasks = (data.Items ?? []).map((item) =>
+    normalizeTask(item as unknown as DynamoDBRawTask),
+  );
 
-    const prioritizedTasks = tasks
-        .map((task) => buildPriorityView(task, now))
-        .sort(comparePriority)
-        .slice(0, DIGEST_MAX_TASKS);
+  const prioritizedTasks = tasks
+    .map((task) => buildPriorityView(task, now))
+    .sort(comparePriority)
+    .slice(0, DIGEST_MAX_TASKS);
 
-    const subject = `Tasks digest - ${new Intl.DateTimeFormat("fr-FR", {
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit",
-    }).format(now)}`;
-    const body = buildEmailBody(prioritizedTasks, now);
+  const subject = `Tasks digest - ${new Intl.DateTimeFormat("fr-FR", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(now)}`;
+  const body = buildEmailBody(prioritizedTasks, now);
 
-    await sendEmail(subject, body);
+  await sendEmail(subject, body);
 
-    return {
-        status: "ok",
-        sentTo: EMAIL_TO,
-        taskCount: prioritizedTasks.length,
-    };
+  return {
+    status: "ok",
+    sentTo: EMAIL_TO,
+    taskCount: prioritizedTasks.length,
+  };
 };

@@ -35,15 +35,15 @@
 }
 
 .taskList ul {
-    padding-inline-start: unset; /* user-agent stylesheet */
+  padding-inline-start: unset; /* user-agent stylesheet */
 }
 
 .taskList li:hover {
-    background: #f0f0f0;
+  background: #f0f0f0;
 }
 
 @media (max-width: 600px) {
-    .wrapper {
-        flex-direction: column;
-    }
+  .wrapper {
+    flex-direction: column;
+  }
 }
