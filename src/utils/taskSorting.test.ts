@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { beforeEach, describe, it, expect, vi, afterEach } from "vitest";
 import {
   convertTaskToDays,
   isSameFrequency,
@@ -6,6 +6,7 @@ import {
   isSameValue,
   unCheckedTasksSortFunction,
   CheckedTasksSortFunction,
+  computeRemainingTimeUntilUncheck_ms,
 } from "./taskSorting";
 import type { Task, TagList } from "../types/derived";
 
@@ -16,6 +17,15 @@ const BASE_TASK: Task = {
   checkedAt: "",
   tags: [] as TagList,
 };
+
+beforeEach(() => {
+  vi.useFakeTimers();
+  vi.setSystemTime(new Date("2026-04-12T12:00:00.000Z"));
+});
+
+afterEach(() => {
+  vi.useRealTimers();
+});
 
 describe("convertTaskToDays", () => {
   it("converts days correctly", () => {
@@ -138,27 +148,53 @@ describe("unCheckedTasksSortFunction", () => {
 });
 
 describe("CheckedTasksSortFunction", () => {
-  it("sorts checked tasks by descending checkedAt date", () => {
-    const now = Date.now();
+  it("sorts checked tasks by ascending remaining time until automatic uncheck", () => {
     const t1 = {
       ...BASE_TASK,
-      checkedAt: new Date(now - 1000 * 60 * 60 * 24).toISOString(),
-    }; // 1 day ago
+      id: "task-1",
+      frequency: { unit: "week", value: 1 },
+      checkedAt: "2026-04-06T12:00:00.000Z",
+    }; // 1 day remaining
     const t2 = {
       ...BASE_TASK,
-      checkedAt: new Date(now - 1000 * 60 * 60 * 48).toISOString(),
-    }; // 2 days ago
-    const t3 = { ...BASE_TASK, checkedAt: new Date(now).toISOString() }; // now
+      id: "task-2",
+      frequency: { unit: "day", value: 2 },
+      checkedAt: "2026-04-11T12:00:00.000Z",
+    }; // 1 day remaining
+    const t3 = {
+      ...BASE_TASK,
+      id: "task-3",
+      frequency: { unit: "month", value: 1 },
+      checkedAt: "2026-04-11T12:00:00.000Z",
+    }; // 29 days remaining
     const arr = [t1, t2, t3];
     const sorted = [...arr].sort(CheckedTasksSortFunction);
-    expect(sorted[0]).toBe(t3); // most recent
-    expect(sorted[2]).toBe(t2); // oldest
+
+    expect(computeRemainingTimeUntilUncheck_ms(sorted[0])).toBe(
+      computeRemainingTimeUntilUncheck_ms(t1),
+    );
+    expect(computeRemainingTimeUntilUncheck_ms(sorted[1])).toBe(
+      computeRemainingTimeUntilUncheck_ms(t2),
+    );
+    expect(computeRemainingTimeUntilUncheck_ms(sorted[2])).toBe(
+      computeRemainingTimeUntilUncheck_ms(t3),
+    );
+    expect(sorted[2]).toBe(t3);
   });
 
-  it("returns 0 for tasks with same checkedAt date", () => {
-    const date = new Date().toISOString();
-    const t1 = { ...BASE_TASK, checkedAt: date };
-    const t2 = { ...BASE_TASK, checkedAt: date };
+  it("returns 0 for tasks with the same remaining time", () => {
+    const t1 = {
+      ...BASE_TASK,
+      id: "task-1",
+      frequency: { unit: "week", value: 1 },
+      checkedAt: "2026-04-06T12:00:00.000Z",
+    };
+    const t2 = {
+      ...BASE_TASK,
+      id: "task-2",
+      frequency: { unit: "day", value: 1 },
+      checkedAt: "2026-04-12T12:00:00.000Z",
+    };
     expect(CheckedTasksSortFunction(t1, t2)).toBe(0);
   });
 });
