@@ -63,7 +63,7 @@ export const handler = async () => {
 
     console.log("DEBUG: Tasks: %o", tasks);
 
-    const tasksToUpdate = [];
+    let uncheckedCount = 0;
 
     for (const task of tasks) {
         if (!task.checkedAt) continue;
@@ -84,13 +84,6 @@ export const handler = async () => {
         if (!shouldUncheck) continue;
 
         console.log("DEBUG: Unchecking task %s", task.title);
-        task.checkedAt = "";
-        tasksToUpdate.push(task);
-        await sendEmail(EMAIL_TO, "Task unchecked", `Task unchecked: ${task.title}`);
-    }
-
-    for (const task of tasksToUpdate) {
-        console.log("DEBUG: Updating task %s", task.title);
 
         await DBClient.send(
             new UpdateItemCommand({
@@ -102,7 +95,15 @@ export const handler = async () => {
                 },
             })
         );
+
+        uncheckedCount += 1;
+
+        try {
+            await sendEmail(EMAIL_TO, "Task unchecked", `Task unchecked: ${task.title}`);
+        } catch (error) {
+            console.error("Failed to send uncheck email for task %s:", task.title, error);
+        }
     }
 
-    return { status: "ok", unchecked: tasksToUpdate.length };
+    return { status: "ok", unchecked: uncheckedCount };
 };

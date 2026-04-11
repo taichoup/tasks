@@ -132,4 +132,38 @@ describe("task auto-uncheck lambda", () => {
             },
         });
     });
+
+    it("still unchecks tasks when sending the email fails", async () => {
+        dbSendMock
+            .mockResolvedValueOnce({
+                Items: [
+                    {
+                        id: { S: "task-3" },
+                        title: { S: "Expired with SES failure" },
+                        checkedAt: { S: "2026-04-08T12:00:00.000Z" },
+                        frequency: {
+                            M: {
+                                value: { N: "1" },
+                                unit: { S: "day" },
+                            },
+                        },
+                    },
+                ],
+            })
+            .mockResolvedValueOnce({});
+        mailSendMock.mockRejectedValueOnce(new Error("SES unavailable"));
+
+        const response = await handler();
+
+        expect(response).toEqual({ status: "ok", unchecked: 1 });
+        expect(dbSendMock).toHaveBeenCalledTimes(2);
+        expect(dbSendMock.mock.calls[1][0].input).toMatchObject({
+            TableName: "test-tasks",
+            Key: { id: { S: "task-3" } },
+            ExpressionAttributeValues: {
+                ":checkedAt": { S: "" },
+            },
+        });
+        expect(mailSendMock).toHaveBeenCalledTimes(1);
+    });
 });
