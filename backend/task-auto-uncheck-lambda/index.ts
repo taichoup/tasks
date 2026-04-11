@@ -41,10 +41,25 @@ async function sendEmail(to: string, subject: string, body: string) {
 }
 
 export const handler = async () => {
-    const data = await DBClient.send(new ScanCommand({ TableName: TASKS_TABLE_NAME }));
     const now = new Date();
+    const items: DynamoDBRawTask[] = [];
+    let lastEvaluatedKey:
+        | Record<string, { S?: string; N?: string; BOOL?: boolean; NULL?: boolean }>
+        | undefined;
 
-    const tasks = data.Items?.map(item => normalizeTask(item as unknown as DynamoDBRawTask)) ?? [];
+    do {
+        const data = await DBClient.send(
+            new ScanCommand({
+                TableName: TASKS_TABLE_NAME,
+                ...(lastEvaluatedKey ? { ExclusiveStartKey: lastEvaluatedKey } : {}),
+            })
+        );
+
+        items.push(...((data.Items as DynamoDBRawTask[] | undefined) ?? []));
+        lastEvaluatedKey = data.LastEvaluatedKey;
+    } while (lastEvaluatedKey);
+
+    const tasks = items.map((item) => normalizeTask(item));
 
     console.log("DEBUG: Tasks: %o", tasks);
 
