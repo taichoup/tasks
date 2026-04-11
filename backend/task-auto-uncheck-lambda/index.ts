@@ -1,6 +1,7 @@
 import {
     DynamoDBClient,
     ScanCommand,
+    type ScanCommandOutput,
     UpdateItemCommand,
 } from "@aws-sdk/client-dynamodb";
 import { SESClient, SendEmailCommand } from "@aws-sdk/client-ses";
@@ -43,9 +44,7 @@ async function sendEmail(to: string, subject: string, body: string) {
 export const handler = async () => {
     const now = new Date();
     const items: DynamoDBRawTask[] = [];
-    let lastEvaluatedKey:
-        | Record<string, { S?: string; N?: string; BOOL?: boolean; NULL?: boolean }>
-        | undefined;
+    let lastEvaluatedKey: ScanCommandOutput["LastEvaluatedKey"];
 
     do {
         const data = await DBClient.send(
