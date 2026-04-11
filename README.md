@@ -7,6 +7,9 @@ TS + React + Vite + AWS (Lambdas, DynamoDB)
 ```bash
 npm run dev                  # local frontend dev server
 npm run test                 # unit tests
+npm run lint                 # lint with oxlint
+npm run format:check         # check formatting with Prettier
+npm run format               # apply Prettier formatting
 npm run generate:types       # generate TS typings in shared/ from backend/openapi.yaml
 npm run build:backend        # compile backend TypeScript (outputs to dist/lambda-ts/)
 npm run push:lambda          # build and deploy the live routing lambda
@@ -42,6 +45,8 @@ Responsibilities are split like this:
 
 `GET /tasks` is read-only. If unchecking or task emails behave oddly, the first place to inspect is the scheduler path and `TaskAutoUncheck`, not the routing lambda.
 
+The dev environment does not currently run a dev equivalent of `TaskAutoUncheck`. As a result, checked tasks in dev are not auto-unchecked on a schedule, and checked-task sorting / expiry behavior in dev can diverge from prod as tasks age.
+
 ## Task state model
 
 The project treats `checkedAt` as the source of truth for current task state:
@@ -68,6 +73,7 @@ Important note:
 
 - the `preprod` name is historical but in practice that old stage behaves like the current live API
 - live and dev are now split more clearly by using separate Lambda/API/DynamoDB resources
+- the scheduled auto-uncheck flow is only wired to live today; there is no separate scheduled dev uncheck path
 
 ### Lambda handler configuration
 
@@ -145,6 +151,12 @@ node_modules/
 ```
 
 The `push:lambda*` scripts run compilation and deployment in one step.
+
+## Tooling
+
+- linting uses `oxlint` with repo config in [`.oxlintrc.json`](./.oxlintrc.json)
+- formatting uses `prettier`
+- `eslint` has been removed from the project
 
 ## Roadmap
 

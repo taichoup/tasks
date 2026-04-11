@@ -17,16 +17,32 @@ Completed recently:
 - shared `normalizeTask` and `convertFrequencyToDays` extracted to `backend/shared/taskUtils.ts`
 - hardcoded PII and secrets removed; config centralized in `backend/shared/config.ts`
 - all backend source files converted from `.mjs` to TypeScript
+- `TaskAutoUncheck` now paginates DynamoDB scans and has dedicated unit tests
+- `TaskAutoUncheck` updates DynamoDB even if SES email delivery fails
+- frontend add-task logic extracted into `src/components/AddTaskForm.tsx`
+- linting migrated from ESLint to `oxlint`; Prettier added for formatting
+- checked-task sorting tests now reflect the current "time remaining until auto-uncheck" behavior
 
 Best next candidates:
 
 1. Tighten CORS (whitelist origins instead of `*`).
-2. Add tests for the auto-uncheck and digest lambdas.
+2. Add tests for the digest lambda and broader component-level frontend behavior.
 3. Add idempotency to scheduled lambdas so retries don't send duplicate emails.
 4. Keep tightening the contract story where OpenAPI and runtime still drift.
 5. Remove DEBUG console.logs from production code.
 
 ## Historical notes
+
+### Apr 11-12
+
+- `TaskAutoUncheck` scan logic fixed to read all DynamoDB scan pages instead of a single page
+- `TaskAutoUncheck` now updates `checkedAt` before attempting SES notification, so SES failures no longer block expiry processing
+- dedicated unit tests added for the auto-uncheck lambda covering paginated scans and SES failures
+- CloudWatch investigation found an AWS handler typo can fully prevent scheduled execution:
+  `task-auto-uncheck-lambda/index.handler` is correct, while `tasks-auto-uncheck-lambda/index.handler` is not
+- frontend add-task form extracted from `App.tsx` into `src/components/AddTaskForm.tsx`
+- linting migrated from ESLint to `oxlint`; `.oxlintrc.json` added; Prettier scripts added
+- checked-task sorting tests updated to assert sorting by remaining time until auto-uncheck rather than raw `checkedAt` recency
 
 ### Apr 2
 
@@ -74,6 +90,7 @@ What may still be worth improving later:
 
 - document the exact dev API URL and AWS resources in one place
 - decide whether the old live API Gateway stage should keep the historical `preprod` name
+- decide whether dev should get its own scheduled auto-uncheck path; today it does not, so dev sorting/state can drift from prod over time
 
 ## 2. Make the API contract real
 
@@ -103,12 +120,14 @@ What is in place:
 - `GET /tasks` in `backend/tasks-lambda/index.ts` is read-only
 - recurring expiry and uncheck emails in `backend/task-auto-uncheck-lambda/index.ts`
 - weekly digest in `backend/task-digest-lambda/index.ts`
+- auto-uncheck tests cover scan pagination and SES failure handling
 
 What may still be worth improving later:
 
 - add idempotency so a scheduler retry does not send duplicate notifications
 - add clearer logging around scheduled runs
-- add tests for the uncheck date calculation and email triggering
+- add tests for the digest lambda
+- consider detecting/validating expected Lambda handler paths as part of deploy docs or tooling
 
 ## 4. Frontend request handling cleanup
 
@@ -180,8 +199,8 @@ Progress so far:
 
 Recommended next tests:
 
-- uncheck date calculation in `task-auto-uncheck-lambda`
-- scheduler behavior and email triggering
+- digest lambda priority and email composition
+- scheduler-facing behavior that is hard to observe locally
 - component-level frontend tests around filtering and task rendering
 
 Why this matters:
