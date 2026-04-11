@@ -39,9 +39,9 @@ import { DAY_IN_MS, HOUR_IN_MS, MINUTE_IN_MS, MONTH_IN_MS, WEEK_IN_MS, YEAR_IN_M
    * @param task The task to compute the remaining time for.
    * @returns The remaining time until the task is unchecked, in Intl.DurationInput format.
    */
-  export const computeRemainingTimeUntilUncheck = (task: Task): Intl.DurationInput => {
+  export const computeRemainingTimeUntilUncheck_ms = (task: Task): number => {
     if (!task.checkedAt || !task.frequency) {
-      return { days: 0, hours: 0, minutes: 0 };
+      return 0;
     }
     const checkedAt = new Date(task.checkedAt);
     const now = new Date();
@@ -55,12 +55,17 @@ import { DAY_IN_MS, HOUR_IN_MS, MINUTE_IN_MS, MONTH_IN_MS, WEEK_IN_MS, YEAR_IN_M
     const nextUncheckTime = new Date(checkedAt.getTime() + frequencyInMs);
     const timeDiff = nextUncheckTime.getTime() - now.getTime();
 
-    return {
-        days: Math.floor(timeDiff / DAY_IN_MS),
-        hours: Math.floor((timeDiff % DAY_IN_MS) / HOUR_IN_MS),
-        minutes: Math.floor((timeDiff % HOUR_IN_MS) / MINUTE_IN_MS),
-    };
+    return timeDiff;
   };
+
+  export const computeRemainingTimeUntilUncheck_duration = (task: Task): Intl.DurationInput => {
+    const timeDiff = computeRemainingTimeUntilUncheck_ms(task);
+    return {
+      days: Math.floor(timeDiff / DAY_IN_MS),
+      hours: Math.floor((timeDiff % DAY_IN_MS) / HOUR_IN_MS),
+      minutes: Math.floor((timeDiff % HOUR_IN_MS) / MINUTE_IN_MS),
+    };
+  }
 
   /**
    * Sort function for unchecked tasks. Tasks with shorter frequency (in days) will be sorted first.
@@ -68,8 +73,13 @@ import { DAY_IN_MS, HOUR_IN_MS, MINUTE_IN_MS, MONTH_IN_MS, WEEK_IN_MS, YEAR_IN_M
   export const unCheckedTasksSortFunction = (a: Task, b: Task) => {
     return convertTaskToDays(a) - convertTaskToDays(b);
   };
-  
-  // assume a and b are both checked
+
+  /**
+   * Sort function for checked tasks. We are assuming here that both tasks have a checkedAt value
+   * We want the tasks sorted by ascending remaining time until they get unchecked automatically
+   */
   export const CheckedTasksSortFunction = (a: Task, b: Task) => {
-    return new Date(b.checkedAt!).getTime() - new Date(a.checkedAt!).getTime();
+    const remainingTimeForA = computeRemainingTimeUntilUncheck_ms(a);
+    const remainingTimeForB = computeRemainingTimeUntilUncheck_ms(b);
+    return remainingTimeForA - remainingTimeForB;
   };

@@ -3,7 +3,7 @@ import type { components } from "../../shared/generated-types";
 import { deleteTask, toggleTask } from "../api/requests";
 import styles from './Task.module.css';
 import { Tag } from "./Tag";
-import { computeRemainingTimeUntilUncheck } from "../utils/taskSorting";
+import { computeRemainingTimeUntilUncheck_duration } from "../utils/taskSorting";
 
 type Task = components["schemas"]["Task"];
 type TaskFrequencyUnit = components["schemas"]["Task"]["frequency"]["unit"];
@@ -62,7 +62,7 @@ export const Task = ({ task }: TaskProps) => {
     } satisfies Intl.DateTimeFormatOptions;
 
     const checkedAtDateDisplayString = task.checkedAt ? new Intl.DateTimeFormat('fr-FR', dateFormatOptions).format(new Date(task.checkedAt)) : null;
-    const remainingDuration = computeRemainingTimeUntilUncheck(task);
+    const remainingDuration = computeRemainingTimeUntilUncheck_duration(task);
     const timeRemainingUntilUncheck = new Intl.DurationFormat('fr', { style: 'long' }).format(remainingDuration);
 
     return (
