@@ -3,8 +3,13 @@ import { type components } from '../../shared/generated-types';
 import type { Task } from '../types/derived';
 
 // Historical note: the old live API Gateway stage is still named "preprod".
-const API_URL: string = import.meta.env.VITE_API_URL;
-if (!API_URL) throw new Error("VITE_API_URL must be set");
+function getApiUrl(): string {
+    const apiUrl = import.meta.env.VITE_API_URL;
+    if (!apiUrl) throw new Error("VITE_API_URL must be set");
+    return apiUrl;
+}
+
+const API_URL = getApiUrl();
 
 // Fetch tasks from API
 export async function fetchTasks() {
@@ -69,4 +74,3 @@ export async function deleteTask(id: string) {
         throw new Error(`Failed to delete task. ${res.statusText}`);
     }
 }
-

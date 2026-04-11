@@ -1,93 +1,14 @@
-import { useState } from "react";
-import { useQueryClient, useMutation } from "@tanstack/react-query";
-import styles from './App.module.css';
-import { addTask } from "./api/requests";
-import type { components } from "../shared/generated-types";
 import { TaskList } from "./components/TaskList";
-
+import { AddTaskForm } from "./components/AddTaskForm";
 
 export default function App() {
-  const [newTitle, setNewTitle] = useState("");
-  const [newRecurrenceQty, setNewRecurrenceQty] = useState(0);
-  const [newRecurrenceUnit, setNewRecurrenceUnit] = useState<components["schemas"]["Task"]["frequency"]["unit"]>("day");
-  const [newTags, setNewTags] = useState<components["schemas"]["Task"]["tags"] | []>([]);
-  const queryClient = useQueryClient();
-
-  const addTaskMutation = useMutation({
-    mutationFn: () => addTask(newTitle, newRecurrenceQty, newRecurrenceUnit, newTags),
-    onSuccess: () => {
-      setNewTitle("");
-      setNewRecurrenceQty(0);
-      setNewRecurrenceUnit("day"); // default
-      setNewTags([]);
-      queryClient.invalidateQueries({ queryKey: ['tasks'], refetchType: 'active' });
-    },
-    onError: (error) => {
-      console.error(error);
-    }
-  });
-
-  const handleAddTask = () => {
-    if (newTitle.trim()) {
-      addTaskMutation.mutate();
-    }
-  };
-
   return (
     <>
       <header>
         <h1>Tasks App</h1>
       </header>
       <main>
-        <div className={styles.addTaskForm}>
-          <input
-            value={newTitle}
-            onChange={(e) => setNewTitle(e.target.value)}
-            placeholder="New task..."
-            autoFocus
-          />
-          <span>tous les...</span>
-          <input
-            type="number"
-            value={newRecurrenceQty}
-            onChange={(e) => setNewRecurrenceQty(Number(e.target.value))}
-            className={styles.numberInput}
-          />
-          <select
-            value={newRecurrenceUnit}
-            onChange={(e) =>
-              setNewRecurrenceUnit(
-                e.target
-                  .value as components["schemas"]["Task"]["frequency"]["unit"]
-              )
-            }
-          >
-            <option value="day">Jours</option>
-            <option value="week">Semaines</option>
-            <option value="month">Mois</option>
-            <option value="year">Ans</option>
-          </select>
-
-          {/* Possible de supporter plusieurs tags, et le schema l'accepterait mais pour l'instant faisons simple */}
-          {/* <select value={newTags ?? ""} onChange={(e) => setNewTags(Array.from(e.target.selectedOptions, option => option.value as components["schemas"]["Task"]["tag"]))} multiple> */}
-          <select
-            value={newTags ?? ""}
-            onChange={(e) =>
-              setNewTags([
-                e.target.value,
-              ] as components["schemas"]["Task"]["tags"])
-            }
-          >
-            <option value="">Ajouter un tag ? </option>
-            <option value="maison">Maison</option>
-            <option value="jardin">Jardin</option>
-            <option value="vélos">Vélos</option>
-            <option value="voiture">Voiture</option>
-          </select>
-          <button onClick={handleAddTask} disabled={addTaskMutation.isPending}>
-            Ajouter
-          </button>
-        </div>
+        <AddTaskForm />
         <TaskList />
       </main>
     </>
