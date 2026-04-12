@@ -16,8 +16,11 @@ export const Task = ({ task }: TaskProps) => {
   }).format(remainingDuration);
 
   return (
-    <li key={task.id} title={`À refaire dans: ${timeRemainingUntilUncheck}`}>
-      <div className={styles.taskMain}>
+    <li key={task.id}>
+      <div
+        className={styles.taskMain}
+        title={`À refaire dans: ${timeRemainingUntilUncheck}`}
+      >
         <input
           className={styles.taskCheckbox}
           type="checkbox"
