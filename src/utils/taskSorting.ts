@@ -70,6 +70,18 @@ export const computeRemainingTimeUntilUncheck_ms = (task: Task): number => {
   return timeDiff;
 };
 
+export const computeUncheckDate = (task: Task): Date | null => {
+  if (!task.checkedAt) {
+    return null;
+  }
+
+  const checkedAt = new Date(task.checkedAt);
+  const frequencyInMs =
+    FREQUENCY_UNIT_TO_MS[task.frequency.unit] * task.frequency.value;
+
+  return new Date(checkedAt.getTime() + frequencyInMs);
+};
+
 export const computeRemainingTimeUntilUncheck_duration = (
   task: Task,
 ): Intl.DurationInput => {

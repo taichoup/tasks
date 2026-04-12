@@ -7,6 +7,7 @@ import {
   unCheckedTasksSortFunction,
   CheckedTasksSortFunction,
   computeRemainingTimeUntilUncheck_ms,
+  computeUncheckDate,
 } from "./taskSorting";
 import type { Task, TagList } from "../types/derived";
 
@@ -196,5 +197,23 @@ describe("CheckedTasksSortFunction", () => {
       checkedAt: "2026-04-12T12:00:00.000Z",
     };
     expect(CheckedTasksSortFunction(t1, t2)).toBe(0);
+  });
+});
+
+describe("computeUncheckDate", () => {
+  it("returns the next automatic uncheck date for checked tasks", () => {
+    const task: Task = {
+      ...BASE_TASK,
+      frequency: { unit: "week", value: 2 },
+      checkedAt: "2026-04-01T12:00:00.000Z",
+    };
+
+    expect(computeUncheckDate(task)?.toISOString()).toBe(
+      "2026-04-15T12:00:00.000Z",
+    );
+  });
+
+  it("returns null for unchecked tasks", () => {
+    expect(computeUncheckDate(BASE_TASK)).toBeNull();
   });
 });
