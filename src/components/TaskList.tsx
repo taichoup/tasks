@@ -16,6 +16,24 @@ import {
 } from "../utils/taskFiltering";
 import styles from "./TaskList.module.css";
 
+type EmptyStateProps = {
+  title: string;
+  filtered: boolean;
+};
+
+function EmptyState({ title, filtered }: EmptyStateProps) {
+  return (
+    <div className={styles.emptyState}>
+      <p className={styles.emptyStateTitle}>{title}</p>
+      <p className={styles.emptyStateText}>
+        {filtered
+          ? "Aucune tâche ne correspond au filtre actuel."
+          : "Aucune tâche dans cette section pour le moment."}
+      </p>
+    </div>
+  );
+}
+
 export function TaskList() {
   const [selectedTag, setSelectedTag] =
     useState<TaskTagFilter>(ALL_TAGS_FILTER);
@@ -45,6 +63,7 @@ export function TaskList() {
   const sortedCheckedTasks = [...(checkedTasks ?? [])].sort(
     CheckedTasksSortFunction,
   );
+  const isFiltered = selectedTag !== ALL_TAGS_FILTER;
 
   return (
     <div className={styles.container}>
@@ -71,19 +90,33 @@ export function TaskList() {
       <div className={styles.wrapper}>
         <div className={styles.taskList}>
           <h2>A faire</h2>
-          <ul>
-            {sortedUncheckedTasks.map((t) => (
-              <Task task={t} key={t.id} />
-            ))}
-          </ul>
+          {sortedUncheckedTasks.length > 0 ? (
+            <ul>
+              {sortedUncheckedTasks.map((t) => (
+                <Task task={t} key={t.id} />
+              ))}
+            </ul>
+          ) : (
+            <EmptyState
+              title="Rien à faire"
+              filtered={isFiltered}
+            />
+          )}
         </div>
         <div className={styles.taskList}>
           <h2>Déjà fait</h2>
-          <ul>
-            {sortedCheckedTasks.map((t) => (
-              <Task task={t} key={t.id} />
-            ))}
-          </ul>
+          {sortedCheckedTasks.length > 0 ? (
+            <ul>
+              {sortedCheckedTasks.map((t) => (
+                <Task task={t} key={t.id} />
+              ))}
+            </ul>
+          ) : (
+            <EmptyState
+              title="Rien de coché"
+              filtered={isFiltered}
+            />
+          )}
         </div>
       </div>
     </div>

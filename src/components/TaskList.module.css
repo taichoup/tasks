@@ -51,6 +51,24 @@
   margin: 0;
 }
 
+.emptyState {
+  padding: 2.5rem 1rem;
+  border: 1px dashed var(--color-border);
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--color-surface-muted) 84%, transparent);
+  text-align: center;
+}
+
+.emptyStateTitle {
+  margin: 0 0 0.35rem;
+  font-weight: 700;
+}
+
+.emptyStateText {
+  margin: 0;
+  color: var(--color-text-muted);
+}
+
 .taskList li:hover {
   background: var(--color-surface-hover);
 }
