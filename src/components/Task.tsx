@@ -2,10 +2,10 @@ import styles from "./Task.module.css";
 import { computeRemainingTimeUntilUncheck_duration } from "../utils/taskSorting";
 import { useTaskMutations } from "../hooks/useTaskMutations";
 import { TaskMetadata } from "./TaskMetadata";
-import type { Task } from "../types/derived";
+import type { Task as TaskItem } from "../types/derived";
 
 interface TaskProps {
-  task: Task;
+  task: TaskItem;
 }
 
 export const Task = ({ task }: TaskProps) => {

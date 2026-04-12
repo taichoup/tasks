@@ -1,7 +1,109 @@
-body {
+:root {
+  color-scheme: light;
   font-family:
     -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu",
     "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+  --color-bg: #f4f4f2;
+  --color-surface: #ffffff;
+  --color-surface-muted: #f7f7f5;
+  --color-surface-hover: #efefeb;
+  --color-text: #1d1d1b;
+  --color-text-muted: #62625d;
+  --color-border: #d7d7d0;
+  --color-border-strong: #b9b8b0;
+  --color-accent: #d6792d;
+  --color-accent-soft: rgba(214, 121, 45, 0.16);
+  --color-danger: #b24729;
+  --shadow-soft: 0 18px 40px rgba(27, 31, 35, 0.08);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    --color-bg: #121315;
+    --color-surface: #1b1d21;
+    --color-surface-muted: #22252a;
+    --color-surface-hover: #2a2f36;
+    --color-text: #f1f3f5;
+    --color-text-muted: #a7adb7;
+    --color-border: #353942;
+    --color-border-strong: #4a505b;
+    --color-accent: #f09a53;
+    --color-accent-soft: rgba(240, 154, 83, 0.22);
+    --color-danger: #ff8d6b;
+    --shadow-soft: 0 18px 40px rgba(0, 0, 0, 0.28);
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--color-bg);
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  background:
+    var(--color-bg);
+  color: var(--color-text);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+  color: inherit;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button,
+input,
+select {
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  transition:
+    border-color 120ms ease,
+    background-color 120ms ease,
+    box-shadow 120ms ease,
+    color 120ms ease;
+}
+
+button:hover:not(:disabled),
+input:hover:not(:disabled),
+select:hover:not(:disabled) {
+  border-color: var(--color-border-strong);
+}
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible {
+  outline: none;
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 4px var(--color-accent-soft);
+}
+
+button {
+  cursor: pointer;
+}
+
+button:disabled,
+input:disabled,
+select:disabled {
+  cursor: not-allowed;
+  opacity: 0.72;
+}
+
+#root {
+  min-height: 100vh;
 }

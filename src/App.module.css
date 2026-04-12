@@ -1,32 +1,73 @@
+.app {
+  min-height: 100vh;
+  padding: 32px 20px 48px;
+}
+
+.main {
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
 .addTaskForm {
   display: flex;
   flex-direction: row;
-  gap: 8px;
-  margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 0 auto 24px;
   justify-content: center;
   align-items: center;
+  padding: 18px;
+  max-width: 980px;
+  border: 1px solid var(--color-border);
+  border-radius: 18px;
+  background: color-mix(in srgb, var(--color-surface) 92%, transparent);
+  box-shadow: var(--shadow-soft);
+  backdrop-filter: blur(10px);
 }
 
 .numberInput {
-  width: 50px;
+  width: 72px;
 }
 
+.addTaskForm input,
 .addTaskForm select,
-button {
-  height: 2rem;
+.addTaskForm button {
+  min-height: 2.5rem;
+  padding: 0 0.85rem;
 }
 
 .addTaskForm input {
-  height: 1.62rem;
+  min-width: 0;
 }
 
-header {
+.addTaskForm button {
+  border-color: var(--color-accent);
+  background: var(--color-accent);
+  color: #fff;
+}
+
+.addTaskForm button:hover:not(:disabled) {
+  border-color: var(--color-accent);
+  filter: brightness(1.04);
+}
+
+.header {
   text-align: center;
-  margin-bottom: 16px;
+  margin-bottom: 20px;
+}
+
+.header h1 {
+  margin: 0;
+  font-size: clamp(2rem, 4vw, 3rem);
+  line-height: 1.05;
 }
 
 @media (max-width: 600px) {
   .addTaskForm {
-    flex-wrap: wrap;
+    padding: 16px;
+  }
+
+  .app {
+    padding-inline: 14px;
   }
 }

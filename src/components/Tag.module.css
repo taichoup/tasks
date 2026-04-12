@@ -1,10 +1,13 @@
 .tag {
-  border-radius: 4px;
-  padding: 2px 4px;
+  border-radius: 999px;
+  padding: 3px 8px;
   margin-right: 4px;
   font-size: 0.9em;
   font-family: Arial, sans-serif;
   width: fit-content;
+  border: 1px solid transparent;
+  background: var(--color-surface);
+  color: var(--color-text);
 }
 
 .jardin {
