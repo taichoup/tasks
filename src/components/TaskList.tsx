@@ -56,7 +56,7 @@ export function TaskList() {
       />
       <div className={styles.wrapper}>
         <TaskSection
-          title="A faire"
+          title="À faire"
           tasks={sortedUncheckedTasks}
           emptyTitle="Rien à faire"
           isFiltered={isFiltered}
