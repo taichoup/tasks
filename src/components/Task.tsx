@@ -19,7 +19,7 @@ export const Task = ({ task }: TaskProps) => {
     <li key={task.id}>
       <div
         className={styles.taskMain}
-        title={`À refaire dans: ${timeRemainingUntilUncheck}`}
+        title={task.checkedAt ? `À refaire dans: ${timeRemainingUntilUncheck}` : undefined}
       >
         <input
           className={styles.taskCheckbox}
