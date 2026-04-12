@@ -9,7 +9,6 @@ interface TaskProps {
 }
 
 export const Task = ({ task }: TaskProps) => {
-  console.log("DEBUG: Rendering task:", task);
   const { toggleMutation, deleteMutation } = useTaskMutations(task);
   const remainingDuration = computeRemainingTimeUntilUncheck_duration(task);
   const timeRemainingUntilUncheck = new Intl.DurationFormat("fr", {
@@ -18,17 +17,20 @@ export const Task = ({ task }: TaskProps) => {
 
   return (
     <li key={task.id} title={`À refaire dans: ${timeRemainingUntilUncheck}`}>
-      <div className={styles.taskDetails}>
-        <label>
-          <input
-            type="checkbox"
-            checked={Boolean(task.checkedAt)}
-            onChange={() => toggleMutation.mutate()}
-            disabled={toggleMutation.isPending}
-          />
-          <strong>{task.title}</strong>
-        </label>
-        <TaskMetadata task={task} />
+      <div className={styles.taskMain}>
+        <input
+          className={styles.taskCheckbox}
+          type="checkbox"
+          checked={Boolean(task.checkedAt)}
+          onChange={() => toggleMutation.mutate()}
+          disabled={toggleMutation.isPending}
+        />
+        <div className={styles.taskDetails}>
+          <label className={styles.taskTitle}>
+            <strong>{task.title}</strong>
+          </label>
+          <TaskMetadata task={task} />
+        </div>
       </div>
       <button
         onClick={() => deleteMutation.mutate()}

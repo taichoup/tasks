@@ -1,8 +1,38 @@
+.taskMain {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+}
+
+.taskCheckbox {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  cursor: pointer;
+  transition:
+    transform 120ms ease,
+    box-shadow 120ms ease;
+}
+
+.taskCheckbox:hover:not(:disabled) {
+  box-shadow: 0 0 5px 4px rgba(60, 60, 60, 0.08);
+  border-color: rgb(214, 121, 45);
+}
+
+.taskCheckbox:disabled {
+  cursor: not-allowed;
+}
+
 .taskDetails {
   display: flex;
   flex-direction: column;
-  margin-left: 8px;
   gap: 4px;
+  flex: 1;
+}
+
+.taskTitle {
+  display: block;
 }
 
 li {
