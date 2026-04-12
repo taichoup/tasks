@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Task } from "./Task";
 import { fetchTasks } from "../api/requests";
 import type { Task as TaskType } from "../types/derived";
+import { TaskFilterBar } from "./TaskFilterBar";
+import { TaskSection } from "./TaskSection";
 import {
   CheckedTasksSortFunction,
   unCheckedTasksSortFunction,
@@ -11,28 +12,9 @@ import {
   ALL_TAGS_FILTER,
   filterTasksByTag,
   getAvailableTaskTags,
-  UNTAGGED_FILTER,
   type TaskTagFilter,
 } from "../utils/taskFiltering";
 import styles from "./TaskList.module.css";
-
-type EmptyStateProps = {
-  title: string;
-  filtered: boolean;
-};
-
-function EmptyState({ title, filtered }: EmptyStateProps) {
-  return (
-    <div className={styles.emptyState}>
-      <p className={styles.emptyStateTitle}>{title}</p>
-      <p className={styles.emptyStateText}>
-        {filtered
-          ? "Aucune tâche ne correspond au filtre actuel."
-          : "Aucune tâche dans cette section pour le moment."}
-      </p>
-    </div>
-  );
-}
 
 export function TaskList() {
   const [selectedTag, setSelectedTag] =
@@ -67,57 +49,24 @@ export function TaskList() {
 
   return (
     <div className={styles.container}>
-      <div className={styles.filterRow}>
-        <label className={styles.filterLabel}>
-          Filtrer par tag
-          <select
-            value={selectedTag}
-            onChange={(event) =>
-              setSelectedTag(event.target.value as TaskTagFilter)
-            }
-            className={styles.filterSelect}
-          >
-            <option value={ALL_TAGS_FILTER}>Tous</option>
-            <option value={UNTAGGED_FILTER}>Sans tag</option>
-            {availableTags.map((tag) => (
-              <option value={tag} key={tag}>
-                {tag}
-              </option>
-            ))}
-          </select>
-        </label>
-      </div>
+      <TaskFilterBar
+        selectedTag={selectedTag}
+        availableTags={availableTags}
+        onChange={setSelectedTag}
+      />
       <div className={styles.wrapper}>
-        <div className={styles.taskList}>
-          <h2>A faire</h2>
-          {sortedUncheckedTasks.length > 0 ? (
-            <ul>
-              {sortedUncheckedTasks.map((t) => (
-                <Task task={t} key={t.id} />
-              ))}
-            </ul>
-          ) : (
-            <EmptyState
-              title="Rien à faire"
-              filtered={isFiltered}
-            />
-          )}
-        </div>
-        <div className={styles.taskList}>
-          <h2>Déjà fait</h2>
-          {sortedCheckedTasks.length > 0 ? (
-            <ul>
-              {sortedCheckedTasks.map((t) => (
-                <Task task={t} key={t.id} />
-              ))}
-            </ul>
-          ) : (
-            <EmptyState
-              title="Rien de coché"
-              filtered={isFiltered}
-            />
-          )}
-        </div>
+        <TaskSection
+          title="A faire"
+          tasks={sortedUncheckedTasks}
+          emptyTitle="Rien à faire"
+          isFiltered={isFiltered}
+        />
+        <TaskSection
+          title="Déjà fait"
+          tasks={sortedCheckedTasks}
+          emptyTitle="Rien de coché"
+          isFiltered={isFiltered}
+        />
       </div>
     </div>
   );
