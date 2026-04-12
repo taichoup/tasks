@@ -1,7 +1,11 @@
 // This Lambda is meant to be triggered on a schedule (e.g. weekly) to send an email digest of upcoming tasks.
 // It's a draft by Codex, I've set it up in AWS (TaskDigest) but the priority logic needs work.
 
-import { DynamoDBClient, ScanCommand } from "@aws-sdk/client-dynamodb";
+import {
+  DynamoDBClient,
+  ScanCommand,
+  type ScanCommandOutput,
+} from "@aws-sdk/client-dynamodb";
 import { SESClient, SendEmailCommand } from "@aws-sdk/client-ses";
 import { normalizeTask, convertFrequencyToDays } from "../shared/taskUtils.js";
 import type { Task, DynamoDBRawTask } from "../shared/taskUtils.js";
@@ -52,7 +56,9 @@ function buildPriorityView(task: Task, now: Date): PriorityTask {
     urgencyBucket: 1,
     urgencyLabel:
       daysUntilDue <= 0
-        ? "En retard"
+        ? "Aujourd'hui"
+        : daysUntilDue === 1
+          ? "Demain"
         : `Dans ${daysUntilDue} jour${daysUntilDue > 1 ? "s" : ""}`,
   };
 }
@@ -60,6 +66,11 @@ function buildPriorityView(task: Task, now: Date): PriorityTask {
 function comparePriority(a: PriorityTask, b: PriorityTask): number {
   if (a.urgencyBucket !== b.urgencyBucket) {
     return a.urgencyBucket - b.urgencyBucket;
+  }
+
+  if (a.urgencyBucket === 1 && a.daysUntilDue !== b.daysUntilDue) {
+    return (a.daysUntilDue ?? Number.POSITIVE_INFINITY) -
+      (b.daysUntilDue ?? Number.POSITIVE_INFINITY);
   }
 
   if (a.recurrenceDays !== b.recurrenceDays) {
@@ -135,12 +146,22 @@ async function sendEmail(subject: string, body: string) {
 
 export const handler = async () => {
   const now = new Date();
-  const data = await DBClient.send(
-    new ScanCommand({ TableName: TASKS_TABLE_NAME }),
-  );
-  const tasks = (data.Items ?? []).map((item) =>
-    normalizeTask(item as unknown as DynamoDBRawTask),
-  );
+  const items: DynamoDBRawTask[] = [];
+  let lastEvaluatedKey: ScanCommandOutput["LastEvaluatedKey"];
+
+  do {
+    const data = await DBClient.send(
+      new ScanCommand({
+        TableName: TASKS_TABLE_NAME,
+        ...(lastEvaluatedKey ? { ExclusiveStartKey: lastEvaluatedKey } : {}),
+      }),
+    );
+
+    items.push(...((data.Items as DynamoDBRawTask[] | undefined) ?? []));
+    lastEvaluatedKey = data.LastEvaluatedKey;
+  } while (lastEvaluatedKey);
+
+  const tasks = items.map((item) => normalizeTask(item));
 
   const prioritizedTasks = tasks
     .map((task) => buildPriorityView(task, now))
