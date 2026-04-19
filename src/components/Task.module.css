@@ -5,24 +5,6 @@
   flex: 1;
 }
 
-.taskCheckbox {
-  width: 18px;
-  height: 18px;
-  flex-shrink: 0;
-  cursor: pointer;
-  transition:
-    transform 120ms ease,
-    box-shadow 120ms ease;
-}
-
-.taskCheckbox:hover:not(:disabled) {
-  border-color: var(--color-accent);
-}
-
-.taskCheckbox:disabled {
-  cursor: not-allowed;
-}
-
 .taskDetails {
   display: flex;
   flex-direction: column;

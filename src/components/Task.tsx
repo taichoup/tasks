@@ -2,6 +2,7 @@ import styles from "./Task.module.css";
 import { computeRemainingTimeUntilUncheck_duration } from "../utils/taskSorting";
 import { useTaskMutations } from "../hooks/useTaskMutations";
 import { TaskMetadata } from "./TaskMetadata";
+import { DateCheckbox } from "./DateCheckbox";
 import type { Task as TaskItem } from "../types/derived";
 
 interface TaskProps {
@@ -21,11 +22,9 @@ export const Task = ({ task }: TaskProps) => {
         className={styles.taskMain}
         title={task.checkedAt ? `À refaire dans: ${timeRemainingUntilUncheck}` : undefined}
       >
-        <input
-          className={styles.taskCheckbox}
-          type="checkbox"
+        <DateCheckbox
           checked={Boolean(task.checkedAt)}
-          onChange={() => toggleMutation.mutate()}
+          onChange={(checkedAt) => toggleMutation.mutate(checkedAt)}
           disabled={toggleMutation.isPending}
         />
         <div className={styles.taskDetails}>

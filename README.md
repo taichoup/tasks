@@ -57,6 +57,8 @@ The project treats `checkedAt` as the source of truth for current task state:
 
 This is intentionally not a long-term completion history model.
 
+Checking a task normally sets `checkedAt` to now. Right-clicking (or long-pressing on mobile) the checkbox opens a date picker to backdate the check — useful when a task was done earlier but not recorded at the time. A backdated `checkedAt` in the past will be picked up and cleared by `TaskAutoUncheck` on its next run if the expiry window has already passed.
+
 ## AWS setup
 
 ### Current resources

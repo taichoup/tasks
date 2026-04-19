@@ -6,7 +6,7 @@ export const useTaskMutations = (task: Task) => {
   const queryClient = useQueryClient();
 
   const toggleMutation = useMutation({
-    mutationFn: () => toggleTask(task),
+    mutationFn: (checkedAt?: string) => toggleTask(task, checkedAt),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
     },

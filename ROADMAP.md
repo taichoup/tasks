@@ -6,6 +6,7 @@ This file combines the original project notes with a more concrete, implementati
 
 Completed recently:
 
+- backdated task check: right-click / long-press on a checkbox opens a date picker to mark a task done at a past date; `TaskAutoUncheck` handles expiry naturally
 - dev/live separation is in place in a first usable version
 - runtime validation in `TasksHandler` with Zod
 - the main routing lambda is read-only again for `GET /tasks`
@@ -32,6 +33,12 @@ Best next candidates:
 5. Remove DEBUG console.logs from production code.
 
 ## Historical notes
+
+### Apr 19
+
+- backdated task check: right-click (or long-press on mobile) on an unchecked task checkbox opens a date picker; the selected date is stored as `checkedAt`; `TaskAutoUncheck` handles expiry naturally for dates already past the frequency window
+- `DateCheckbox` component extracted to encapsulate checkbox + popover interaction
+- `src/utils/dateUtils.ts` added for `toLocalDateString` and `dateInputToIso` helpers
 
 ### Apr 11-12
 
